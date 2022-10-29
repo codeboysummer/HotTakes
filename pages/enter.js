@@ -1,13 +1,12 @@
 import { auth, db, googleAuthProvider } from "../lib/firebase";
 import { UserContext } from "../lib/context";
-import { doc, getDoc,writeBatch } from "firebase/firestore";
+import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { signInWithPopup } from "firebase/auth";
 import { useEffect, useState, useCallback, useContext } from "react";
 import debounce from "lodash/debounce";
 import { Button, Input, useToast, VStack } from "@chakra-ui/react";
 
 export default function Enter(props) {
-  
   const { user, username } = useContext(UserContext);
 
   // 1. user signed out <SignInButton />
@@ -19,8 +18,7 @@ export default function Enter(props) {
         !username ? (
           <UsernameForm />
         ) : (
-          <>
-          </>
+          <>hello {username}</>
         )
       ) : (
         <SignInButton />
@@ -28,7 +26,6 @@ export default function Enter(props) {
     </VStack>
   );
 }
-
 
 // Sign in with Google button
 function SignInButton() {
@@ -65,28 +62,26 @@ function UsernameForm() {
   const { user, username } = useContext(UserContext);
 
   const onSubmit = async (e) => {
-
     e.preventDefault();
 
     // Create refs for both documents
-   try {
-    const userDoc = doc(db,`users/${user.uid}`);
-    const usernameDoc = doc(db,`usernames/${formValue}`);
+    try {
+      const userDoc = doc(db, `users/${user.uid}`);
+      const usernameDoc = doc(db, `usernames/${formValue}`);
 
-    // Commit both docs together as a batch write.
-    const batch = writeBatch(db);
-    batch.set(userDoc, {
-      username: formValue,
-      photoURL: user.photoURL,
-      displayName: user.displayName,
-    });
-    batch.set(usernameDoc, { uid: user.uid });
+      // Commit both docs together as a batch write.
+      const batch = writeBatch(db);
+      batch.set(userDoc, {
+        username: formValue,
+        photoURL: user.photoURL,
+        displayName: user.displayName,
+      });
+      batch.set(usernameDoc, { uid: user.uid });
 
-    await batch.commit();
-    
-   } catch (error) {
-    console.log(error);
-   }
+      await batch.commit();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onChange = (e) => {
@@ -119,12 +114,13 @@ function UsernameForm() {
   const checkUsername = useCallback(
     debounce(async (username) => {
       if (username.length >= 3) {
-        const ref = doc(db,`usernames/${username}`);
-        const  exists  =  await getDoc(ref).exists;
+        const ref = doc(db, `usernames/${username}`);
+        const docSnap = await getDoc(ref);
+        const exists = docSnap.exists();
         console.log("Firestore read executed!");
+        console.log(exists);
         setIsValid(!exists);
         setLoading(false);
-        
       }
     }, 500),
     []

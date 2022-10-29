@@ -1,9 +1,20 @@
-import React from 'react'
+import {
+  Button,
+  Heading,
+  Input,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import Take from "../../comps/Take";
+import React from "react";
 
 const takes = () => {
   return (
-    <div>takes</div>
-  )
-}
+ <VStack>
+ <Take/>
+ </VStack>
+  );
+};
 
-export default takes
+export default takes;

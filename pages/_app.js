@@ -14,6 +14,7 @@ function MyApp({ Component, pageProps }) {
   const userData = useUserData();
   
   return (
+    
     <ChakraProvider>
       <UserContext.Provider value={userData}>
         <Navbar />

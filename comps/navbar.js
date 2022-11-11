@@ -19,10 +19,15 @@ export default function Navbar() {
         left={0}
         p={3}
       >
-        <Flex>
+        <Flex cursor={'pointer'}>
           <Image />
-          <Heading color={"#f7a110 "}>Hot</Heading>
-          <Heading color={"#3ca9e9"}>Takes</Heading>
+          <Link href={'/'}>
+            <Heading color={"#f7a110 "}>Hot</Heading>
+            </Link>
+            <Link href={'/'}>
+              <Heading color={"#3ca9e9"}>Takes</Heading>
+            </Link>
+          
         </Flex>
 
         <Flex

@@ -17,25 +17,34 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
+
+
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
-import React from "react";
+import React, { useContext } from "react";
 import { auth, db } from "../lib/firebase";
 import { useState } from "react";
 import Switch from "react-ios-switch";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
-import { addDoc, serverTimestamp, doc, collection } from "firebase/firestore";
+import { UserContext } from "../lib/context";
+import {
+  addDoc,
+  serverTimestamp,
+  doc,
+  collection,
+  setDoc,
+} from "firebase/firestore";
 const Take = () => {
   const [take, settake] = useState({ take: "" });
-  const navigate=useRouter()
+  const navigate = useRouter();
+  const {username}  = useContext(UserContext)
 
   const toast = useToast();
   const [switchValue, setswitchValue] = useState(false);
   const [user] = useAuthState(auth);
   const query = collection(db, `users`);
   const [docs, loading, error] = useCollectionData(query);
-  
 
   const toggleSwitch = () => {
     if (switchValue == true) {
@@ -45,66 +54,120 @@ const Take = () => {
     }
   };
 
-  const submitTake = async () => {
-    try {
-      // first we need to create a reference to the documnent
+  // const submitTak = async () => {
+  //   try {
+  //     // first we need to create a reference to the documnent
 
-      const docRef = doc(db, "users", user.uid);
-      const collectionRef = collection(docRef, "takes");
-      console.log(take);
+  //     const docRef = doc(db, "users", user.uid);
+  //     const collectionRef = collection(docRef, "takes");
+  //     console.log(take);
+  //     await addDoc(collectionRef, {
+  //        take:take,
+  //       timestamp: serverTimestamp(),
+  //       canComment: switchValue,
+  //       user: user.uid,
+  //       avatar: user.photoURL,
+  //       username: user.displayName,
+  //     });
+  //     toast({ title: "posted", status: "success", duration: 2000 });
+  //     navigate.push("/");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  //   const submitTake = async () => {
+  //     try {
+
+  // const collectionRef=collection(db,`posts`,user.uid.toString(),'takes')
+
+  //       await addDoc(collectionRef, {
+  //         take: take,
+  //         timestamp: serverTimestamp(),
+  //         canComment: switchValue,
+  //         user: user.uid,
+  //         avatar: user.photoURL,
+  //         username: user.displayName,
+  //       });
+  //       toast({ title: "posted", status: "success", duration: 2000 });
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  const submitTake = async (e) => {
+    //Run checks for description
+    if(!take.length){
+            toast({ status: "error", title: "no description", duration: 2000 });
+return;
+    }
+    if (take.length > 300) {
+      return;
+    }
+    
+
+    if (take?.hasOwnProperty("id")) {
+      const docRef = doc(db, "posts", take.id);
+      const updatedtake = { ...take, timestamp: serverTimestamp() };
+      await updateDoc(docRef, updatedtake);
+      return navigate.push("/");
+    } else {
+      //Make a new post
+      const collectionRef = collection(db, "posts");
       await addDoc(collectionRef, {
-      take:take,
+        take:take,
         timestamp: serverTimestamp(),
-        canComment: switchValue,
         user: user.uid,
+        canComment:switchValue,
         avatar: user.photoURL,
-        username: user.displayName,
+        username: username,
       });
-      toast({ title: "posted", status: "success", duration: 2000 });
-navigate.push('/')
-    } catch (error) {
-      console.log(error);
+      settake({ description: "" });
+      toast({title:"Post has been made 🚀", status:'success',
+        duration: 1500,}
+      )
+      return navigate.push("/");
     }
   };
 
   return (
     <VStack h={"50vh"} display={"grid"} placeItems={"center"}>
       <VStack>
-        <Flex
-          w={[200, 500, 700]}
-          gap={3}
-          justifyContent={"space-around"}
-          alignItems={"center"}
-          border={"1px solid black"}
-        >
-          <HStack>
-            <Text fontSize={"3rem"}>&#128077;</Text>
-            <Stat>
-              <StatNumber>0</StatNumber>
-              <StatHelpText>
-                <StatArrow type="increase" />
-                0%
-              </StatHelpText>
-            </Stat>
-          </HStack>
-          <Input
-            value={take.take}
-            onChange={(e) => {
-              settake(e.target.value);
-            }}
-            w={"80%"}
-          />
-          <HStack>
-            <Text fontSize={"3rem"}>&#128078;</Text>
-            <Stat>
-              <StatNumber>0</StatNumber>
-              <StatHelpText>
-                <StatArrow type="decrease" />
-                0%
-              </StatHelpText>
-            </Stat>
-          </HStack>
-        </Flex>
+        <>
+          <Flex
+            w={[200, 500, 700]}
+            gap={3}
+            justifyContent={"space-around"}
+            alignItems={"center"}
+            border={"1px solid black"}
+          >
+            <HStack>
+              <Text fontSize={"3rem"}>&#128077;</Text>
+              <Stat>
+                <StatNumber>0</StatNumber>
+                <StatHelpText>
+                  <StatArrow type="increase" />
+                  0%
+                </StatHelpText>
+              </Stat>
+            </HStack>
+            <Input
+              value={take.take}
+              onChange={(e) => {
+                settake(e.target.value)
+              }}
+              w={"80%"}
+            />
+            <HStack>
+              <Text fontSize={"3rem"}>&#128078;</Text>
+              <Stat>
+                <StatNumber>0</StatNumber>
+                <StatHelpText>
+                  <StatArrow type="decrease" />
+                  0%
+                </StatHelpText>
+              </Stat>
+            </HStack>
+          </Flex>
+        </>
         <HStack>
           <Switch
             checked={switchValue}

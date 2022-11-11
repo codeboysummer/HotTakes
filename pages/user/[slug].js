@@ -1,52 +1,65 @@
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import { auth, db } from "../../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import HotTakes from "../../comps/HotTakes";
+import { DragHandleIcon } from "@chakra-ui/icons";
 
 import {
+  Box,
   Heading,
+  HStack,
+  IconButton,
   Image,
+  MenuButton,
+  MenuItem,
   Skeleton,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
+
 import { UserContext } from "../../lib/context";
 
-export default function Welcomeuser() {
+export async function getServerSideProps() {
+  const collectionRef = collection(db, "posts");
+  const q = query(collectionRef, where("user", "==", user.uid));
+  const data = onSnapshot(q, (snapshot) => {
+    snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+  });
+ 
+  return {props:{data}}
+} 
+export default function Welcomeuser({data}) {
   const navigate = useRouter();
+
   const { username } = useContext(UserContext);
-  const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
   const [takes, settakes] = useState([]);
+
   const getData = async () => {
-    // if user is present run function
+    if (loading) return;
+    if (!user) return navigate.push("/enter");
+    settakes(data)
+    
+    
 
-    if (user) {
-      const docRef = doc(db, "users", user.uid);
-      const collectionRef = collection(docRef, "takes");
-      const querySnapshot = await getDocs(collectionRef);
-
-      const data = querySnapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-
-      settakes(data);
-
-      // from firebase docs
-
-      // querySnapshot.forEach((doc) => {
-      //   console.log("getData()", doc.id, " => ", doc.data());
-      // });
-
-      // const data = querySnapshot.docs.map((d) => ({
-      //   id: d.id,
-      //   ...d.data(),
-      // }));
-    }
+    // const collectionRef = collection(db, "posts");
+    // const q = query(collectionRef, where("user", "==", user.uid));
+    // const unsubscribe = onSnapshot(q, (snapshot) => {
+    //   settakes(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    // });
+    // return unsubscribe;
   };
 
   // use effect is because on initial page load the user may not have been loaded yet so when it changes the useeffect will re-run
@@ -76,9 +89,21 @@ export default function Welcomeuser() {
 
   return (
     <>
-      {takes.map((doc) => (
-        <HotTakes key={doc.id} canComment={doc.canComment} take={doc.take} />
-      ))}
+      <HStack>
+        <VStack w={"100%"}>
+          {takes.length == 0
+            ? "you dont have any takes"
+            : takes.map((doc) => (
+                <HotTakes
+                  key={doc.id}
+                  postUsername={doc.username}
+                  canComment={doc.canComment}
+                  take={doc.take}
+                  takeId={doc.id}
+                />
+              ))}
+        </VStack>
+      </HStack>
     </>
   );
 }

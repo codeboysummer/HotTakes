@@ -4,6 +4,7 @@ import {
   EditableInput,
   EditableTextarea,
   EditablePreview,
+  ScaleFade,
 } from "@chakra-ui/react";
 import {
   Box,
@@ -73,6 +74,7 @@ import {
   MenuDivider,
 } from "@chakra-ui/react";
 import MenuBtn from "./MenuBtn";
+import HotTakeLayout from "./HotTakeLayout";
 
 const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   const toast = useToast();
@@ -205,8 +207,12 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   return (
     <>
       <VStack>
-        <Box padding={2} bg={"black"}>
-          <VStack w={"100%"} p={1} bg={"white"} border={"1px solid black"}>
+        <HotTakeLayout likeCount={likeCount} total={total} dislikeCount={dislikeCount} >
+          <VStack
+            p={1}
+            w={"100%"}
+            
+          >
             {postUsername == ourUsername ? (
               <>
                 <MenuBtn
@@ -228,7 +234,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
             )}
 
             <Flex
-              w={[300,350, 400, 500, 700]}
+              w={[300, 350, 400, 500, 700]}
               justifyContent={"space-around"}
               alignItems={"center"}
               h={"fit-content"}
@@ -258,6 +264,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                     value={formValue}
                     type={"text"}
                   />
+                  
                 </>
               ) : (
                 <Heading
@@ -304,10 +311,10 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                 />
               </HStack>
             ) : (
-              <Comments  takeId={takeId} canComment={canComment} />
+              <Comments takeId={takeId} canComment={canComment} />
             )}
           </VStack>
-        </Box>
+        </HotTakeLayout>
       </VStack>
     </>
   );

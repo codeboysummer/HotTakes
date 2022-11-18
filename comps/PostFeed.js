@@ -4,7 +4,7 @@ export default function PostFeed({ posts }) {
   
   return (
     <>
-      <VStack>
+      <>
         {posts?.map((post) => {
           const postId = post.id;
           return (
@@ -17,7 +17,7 @@ export default function PostFeed({ posts }) {
             />
           );
         })}
-      </VStack>
+      </>
     </>
   );
 }

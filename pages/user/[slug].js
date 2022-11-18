@@ -77,7 +77,7 @@ export default function Welcomeuser() {
   return (
     <>
       <HStack>
-        <VStack w={"100%"}>
+        <VStack w={"100%"} mt={'10%'}>
           {takes?.length == 0
             ? "you dont have any takes"
             : takes?.map((doc) => (

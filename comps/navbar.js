@@ -1,9 +1,18 @@
-import { Box, Button, Flex, Heading, Image } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  IconButton,
+  Image,
+  Text,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
 import { useContext } from "react";
 import { UserContext } from "../lib/context";
 import { auth } from "../lib/firebase";
+import { AddIcon, PlusSquareIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
   const { user, username } = useContext(UserContext);
@@ -14,24 +23,29 @@ export default function Navbar() {
         justifyContent={"space-between"}
         w={"100%"}
         h={"3rem"}
-        pos={"relative"}
+        pos={"fixed"}
         top={0}
         left={0}
-        p={3}
+        p={5}
+        zIndex={999
+        }
+        bg={'blackAlpha.800'}
+
+      
+       
       >
-        <Flex cursor={'pointer'}>
+        <Flex cursor={"pointer"}>
           <Image />
-          <Link href={'/'}>
+          <Link href={"/"}>
             <Heading color={"#f7a110 "}>Hot</Heading>
-            </Link>
-            <Link href={'/'}>
-              <Heading color={"#3ca9e9"}>Takes</Heading>
-            </Link>
-          
+          </Link>
+          <Link href={"/"}>
+            <Heading color={"#3ca9e9"}>Takes</Heading>
+          </Link>
         </Flex>
 
         <Flex
-          w={"30%"}
+          w={["50%", "40%", "30%"]}
           alignItems={"center"}
           justifyContent={!username ? "flex-end" : "space-around"}
         >
@@ -45,11 +59,12 @@ export default function Navbar() {
           {username && (
             <>
               <Link href={"/admin/takes"}>
-                <Button>Create Takes</Button>
+                <IconButton transition={'.5s ease'} _hover={{
+    backgroundColor: "black",
+    color: "teal.500",
+  }}  isRound mr={2} colorScheme={"gray"} icon={<AddIcon />} />
               </Link>
-              <Link href={{pathname:`/user/${username}`,
-            query:{uid:user.uid}
-            }}>
+              <Link href={{ pathname: `/user/${username}` }}>
                 <Image
                   cursor={"pointer"}
                   borderRadius={"50%"}

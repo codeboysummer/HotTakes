@@ -21,7 +21,10 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-firebase-hooks": "^5.0.3",
-    "react-ios-switch": "^0.1.19"
+    "react-ios-switch": "^0.1.19",
+    "react-swipe-to-delete-component": "^1.0.8",
+    "react-swipe-to-delete-ios": "^2.1.0",
+    "react-swipeable-list": "^1.6.0"
   },
   "devDependencies": {
     "eslint": "8.25.0",

@@ -1,4 +1,13 @@
-import { collection, doc, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  startAfter,
+} from "firebase/firestore";
 import Head from "next/head";
 import { useEffect } from "react";
 
@@ -7,19 +16,68 @@ import PostFeed from "../comps/PostFeed";
 import { auth, db } from "../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
+import { Button, Heading, Spinner, VStack } from "@chakra-ui/react";
 
 export default function Home() {
   const [user] = useAuthState(auth);
   const [allPosts, setAllPosts] = useState([]);
-  
+  const [lastDoc, setlastDoc] = useState([]);
+  const [loading, setloading] = useState(false);
+  const [endReached, setendReached] = useState(false);
 
   const getPosts = async () => {
     const collectionRef = collection(db, "posts");
-    const q = query(collectionRef, orderBy("timestamp", "desc"));
+    const q = query(collectionRef, orderBy("timestamp", "desc"), limit(4));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAllPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+      setlastDoc(lastVisible);
     });
+
     return unsubscribe;
+  };
+
+  const getMore = async () => {
+    try {
+      setloading(true);
+      const collectionRef = collection(db, "posts");
+      const q = query(
+        collectionRef,
+        orderBy("timestamp", "desc"),
+        limit(4),
+        startAfter(lastDoc)
+      );
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        setAllPosts([
+          ...allPosts,
+          ...snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
+
+        ]
+
+        
+        
+        );
+
+        console.log(snapshot.docs.length);
+        if (snapshot.docs.length==0) {
+          setendReached(true)
+          
+        } else {
+          setendReached(false)
+          
+        }
+       
+
+        const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+        setlastDoc(lastVisible);
+      });
+      setloading(false);
+
+      return unsubscribe;
+    } catch (error) {
+      console.log(error);
+    }
   };
   useEffect(() => {
     getPosts();
@@ -34,7 +92,11 @@ export default function Home() {
         <link rel="icon" hrefnpm="/favicon.ico" />
       </Head>
       <main>
+      <VStack mt={['15%','10%','7%']} >
         <PostFeed posts={allPosts} />
+        
+          {loading ? <Spinner /> :endReached?<Heading> no more posts</Heading>: <Button colorScheme={'blue'} onClick={getMore}>more</Button>}
+        </VStack>
       </main>
     </>
   );

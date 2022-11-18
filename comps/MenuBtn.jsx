@@ -1,6 +1,8 @@
 import { DragHandleIcon } from "@chakra-ui/icons";
+import { useState } from "react";
 import {
   Button,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -12,14 +14,23 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
   Text,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { doc, updateDoc } from "firebase/firestore";
+
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-const MenuBtn = ({ takeId, canComment }) => {
+const MenuBtn = ({ takeId, canComment,setisEditable }) => {
+  
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const toggleComments = async () => {
@@ -32,20 +43,38 @@ const MenuBtn = ({ takeId, canComment }) => {
       console.log(error);
     }
   };
+  const deleteTake = async () => {
+    try {
+      const docRef = doc(db, `posts/${takeId}`);
+      await deleteDoc(docRef);
+      toast({ title: "deleted :(", status: "success", duration: 2000 });
+      onOpen();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  
 
   return (
     <Menu>
-      <MenuButton
+      <MenuButton colorScheme={'purple'}
         alignSelf={"flex-end"}
-        as={Button}
-        rightIcon={<DragHandleIcon />}
+        as={IconButton}
+        icon={<DragHandleIcon />}
+        
       >
-        Actions
+        
       </MenuButton>
       <MenuList>
-        <MenuItem>Edit</MenuItem>
+       
+        <MenuItem onClick={()=>{setisEditable(true)}}>Edit</MenuItem>
+        
+        
+
         {/* modal */}
 
+        {/* add editable to edit */}
         <MenuItem onClick={onOpen}>Delete</MenuItem>
 
         <Modal onClose={onClose} isOpen={isOpen} isCentered>
@@ -60,7 +89,7 @@ const MenuBtn = ({ takeId, canComment }) => {
               </Text>
             </ModalBody>
             <ModalFooter gap={2}>
-              <Button onClick={onClose} colorScheme={"red"}>
+              <Button onClick={deleteTake} colorScheme={"red"}>
                 Delete
               </Button>
               <Button onClick={onClose}>Cancel</Button>
@@ -68,7 +97,9 @@ const MenuBtn = ({ takeId, canComment }) => {
           </ModalContent>
         </Modal>
 
-        <MenuItem onClick={toggleComments}>{canComment?"disable":"enable"} Comments</MenuItem>
+        <MenuItem onClick={toggleComments}>
+          {canComment ? "Disable" : "Enable"} Comments
+        </MenuItem>
         {/* notifcation type */}
       </MenuList>
     </Menu>

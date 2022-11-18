@@ -1,5 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import {
+  Editable,
+  EditableInput,
+  EditableTextarea,
+  EditablePreview,
+} from "@chakra-ui/react";
+import {
   Box,
   Button,
   Drawer,
@@ -9,9 +15,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  Editable,
-  EditableInput,
-  EditablePreview,
   Flex,
   Heading,
   HStack,
@@ -38,7 +41,13 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { ChatIcon, DragHandleIcon } from "@chakra-ui/icons";
+import {
+  ChatIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  CloseIcon,
+  DragHandleIcon,
+} from "@chakra-ui/icons";
 import UpVoteButton from "./UpVoteButton";
 import DownVoteButton from "./DownVoteButton";
 import { UserContext } from "../lib/context";
@@ -54,6 +63,7 @@ import {
   getDoc,
   deleteDoc,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import {
   Menu,
@@ -67,9 +77,12 @@ import MenuBtn from "./MenuBtn";
 const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   const toast = useToast();
   const [user] = useAuthState(auth);
+  const [formValue, setformValue] = useState(take);
   const { username: ourUsername } = useContext(UserContext);
   const [likeCount, setlikeCount] = useState(0);
   const [dislikeCount, setdislikeCount] = useState(0);
+  const [isEditable, setisEditable] = useState(false);
+
   const total = dislikeCount + likeCount;
 
   const UpVote = async () => {
@@ -167,6 +180,23 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
 
     return setdislikeCount(collectionDoc.size);
   };
+  const editTake = async () => {
+    try {
+      const docRef = doc(db, `posts/${takeId}`);
+      if (formValue.length == 0)
+        return toast({
+          title: "your take cannot be empty",
+          duration: 2000,
+          status: "error",
+        });
+      if (formValue == take) return;
+      await updateDoc(docRef, { take: formValue });
+      toast({ title: "updated", duration: 2000, status: "success" });
+      setisEditable(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     getNumberOfDisLikes();
     getNumberOfLikes();
@@ -176,11 +206,14 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     <>
       <VStack>
         <Box padding={2} bg={"black"}>
-          <VStack w={"100%"} p={4} bg={"white"} border={"1px solid black"}>
-            {/* < IconButton alignSelf={'flex-end'} icon={<DragHandleIcon/>}/> */}
+          <VStack w={"100%"} p={1} bg={"white"} border={"1px solid black"}>
             {postUsername == ourUsername ? (
               <>
-                <MenuBtn takeId={takeId} canComment={canComment} />
+                <MenuBtn
+                  setisEditable={setisEditable}
+                  takeId={takeId}
+                  canComment={canComment}
+                />
               </>
             ) : (
               <></>
@@ -195,13 +228,17 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
             )}
 
             <Flex
-              w={[200, 500, 700]}
+              w={[300,350, 400, 500, 700]}
               justifyContent={"space-around"}
               alignItems={"center"}
               h={"fit-content"}
             >
               <HStack>
-                <Text cursor={"pointer"} onClick={UpVote} fontSize={"3rem"}>
+                <Text
+                  cursor={"pointer"}
+                  onClick={UpVote}
+                  fontSize={["2.5rem", "3rem"]}
+                >
                   👍
                 </Text>
                 <Stat>
@@ -212,11 +249,33 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                   </StatHelpText>
                 </Stat>
               </HStack>
-              <Heading w={"70%"} flexWrap={"wrap"} textAlign={"center"}>
-                {take}
-              </Heading>
+
+              {isEditable ? (
+                <>
+                  <Input
+                    onChange={(e) => setformValue(e.target.value)}
+                    isInvalid={formValue.length == 0}
+                    value={formValue}
+                    type={"text"}
+                  />
+                </>
+              ) : (
+                <Heading
+                  size={["md", "lg"]}
+                  w={"100%"}
+                  flexWrap={"wrap"}
+                  textAlign={"center"}
+                >
+                  {take}
+                </Heading>
+              )}
+
               <HStack>
-                <Text cursor={"pointer"} onClick={DownVote} fontSize={"3rem"}>
+                <Text
+                  cursor={"pointer"}
+                  onClick={DownVote}
+                  fontSize={["2.5rem", "3rem"]}
+                >
                   👎
                 </Text>{" "}
                 <Stat>
@@ -231,36 +290,22 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                 </Stat>
               </HStack>
             </Flex>
-            <Comments takeId={takeId} canComment={canComment} />
-            {/* <HStack>
-              {canComment && (
-                <ChatIcon cursor={"pointer"} onClick={onOpen} w={7} h={7} />
-              )}
-            </HStack>
-            <Drawer
-              placement={"bottom"}
-              isOpen={isOpen}
-              size={"lg"}
-              onClose={onClose}
-              finalFocusRef={btnRef}
-            >
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Comments</DrawerHeader>
-
-                <DrawerBody>
-                  <HStack>
-                    <Input disabled={!user} placeholder="Type here..." />
-                    <Button colorScheme={"purple"} disabled={!user}>Post</Button>
-                  </HStack>
-                </DrawerBody>
-
-                <DrawerFooter>
-                  <></>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer> */}
+            {isEditable ? (
+              <HStack>
+                <IconButton
+                  onClick={editTake}
+                  colorScheme={"green"}
+                  icon={<CheckIcon />}
+                />
+                <IconButton
+                  onClick={() => setisEditable(false)}
+                  colorScheme={"red"}
+                  icon={<CloseIcon />}
+                />
+              </HStack>
+            ) : (
+              <Comments  takeId={takeId} canComment={canComment} />
+            )}
           </VStack>
         </Box>
       </VStack>

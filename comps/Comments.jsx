@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
   Button,
+  Container,
+  Divider,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -16,11 +18,21 @@ import {
   SkeletonCircle,
   SkeletonText,
   Stack,
+  StackDivider,
   Text,
   useDisclosure,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
-import { ChatIcon } from "@chakra-ui/icons";
+import {
+  LeadingActions,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from "react-swipeable-list";
+import "react-swipeable-list/dist/styles.css";
+import { ChatIcon, CloseIcon } from "@chakra-ui/icons";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../lib/firebase";
@@ -38,31 +50,46 @@ import {
 } from "firebase/firestore";
 import { useDocument } from "react-firebase-hooks/firestore";
 import { UserContext } from "../lib/context";
+import Comment from "./Comment";
+import SwipeAbleComponent from "./SwipeAbleComponent";
 const Comments = ({ canComment, takeId }) => {
+  const screenWidth = window.screen.width;
   const [comment, setcomment] = useState("");
   const [postComments, setpostComments] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
   const [user] = useAuthState(auth);
-
+  const toast = useToast();
   const { username } = useContext(UserContext);
-  const handleOrderComments=()=>{}
   const getComments = async () => {
     try {
       const docRef = doc(db, "posts", takeId);
       onSnapshot(docRef, (snapshot) => {
-        const postCommentsArray = snapshot?.data().postComments;
+        const postCommentsArray = snapshot?.data()?.postComments;
         setpostComments(postCommentsArray?.reverse());
-        
-
-        
       });
     } catch (error) {
       console.log(error);
     }
-    
-
   };
+  const deleteComment = async (comment) => {
+    // value passed in is the comment we wna to filter out
+
+    const updatedArray = postComments?.filter(
+      (postComment) => postComment !== comment
+    );
+    console.log(updatedArray);
+    setpostComments(updatedArray);
+    try {
+      const docRef = doc(db, `posts/${takeId}`);
+      await updateDoc(docRef, { postComments: updatedArray });
+      toast({ title: "comment deleted", duration: 2000, status: "success" });
+      getComments();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getComments();
   }, [HandleSubmitComment]);
@@ -83,6 +110,24 @@ const Comments = ({ canComment, takeId }) => {
       console.log(error);
     }
   };
+  const leadingActions = () => (
+    <LeadingActions>
+      <SwipeAction onClick={() => console.info("swipe action triggered")}>
+        Action name
+      </SwipeAction>
+    </LeadingActions>
+  );
+
+  const trailingActions = () => (
+    <TrailingActions>
+      <SwipeAction
+        destructive={true}
+        onClick={() => console.info("swipe action triggered")}
+      >
+        Delete
+      </SwipeAction>
+    </TrailingActions>
+  );
   return (
     <>
       <HStack>
@@ -109,42 +154,46 @@ const Comments = ({ canComment, takeId }) => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Comments</DrawerHeader>
 
-          <DrawerBody>
-            <HStack>
-              <Input
-                disabled={!user}
-                onChange={(e) => {
-                  setcomment(e.target.value);
-                }}
-                placeholder="Type here..."
-              />
-              <Button
-                colorScheme={"purple"}
-                onClick={HandleSubmitComment}
-                disabled={!user}
-              >
-                Post
-              </Button>
-            </HStack>
+          <>
+            <DrawerHeader>Comments</DrawerHeader>
+
             <>
-              {postComments?.map((comment, i) => (
-                <Box mt={"1%"} bg={"blackAlpha.100"} key={i}>
-                  <Flex gap={"3%"} alignItems={"center"}>
-                    <Image
-                      w={10}
-                      h={10}
-                      borderRadius={"50%"}
-                      marginLeft={"right"}
-                      src={comment.avatar}
-                    />
-                    {<Text>{comment.username}</Text>}
-                    <Text>{comment.comment}</Text>
-                  </Flex>
-                </Box>
-              ))}
+              <Flex p={2} alignSelf={'center'}  w={['100%','70%',"50%"]}>
+                <Input
+                  alignSelf={"center"}
+                  disabled={!user}
+                  onChange={(e) => {
+                    setcomment(e.target.value);
+                  }}
+                  placeholder="Type here..."
+                />
+
+                <Button
+                  colorScheme={"purple"}
+                  onClick={HandleSubmitComment}
+                  disabled={!user}
+                >
+                  Post
+                </Button>
+              </Flex>
             </>
+          </>
+          <DrawerBody>
+            <VStack>
+              {postComments?.map((comment, i) => (
+                
+                 
+
+                  <Comment
+                    key={i}
+                    postComments={postComments}
+                    comment={comment}
+                    deleteComment={deleteComment}
+                  />
+                
+              ))}
+            </VStack>
           </DrawerBody>
 
           <DrawerFooter>

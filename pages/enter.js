@@ -4,16 +4,18 @@ import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { signInWithPopup } from "firebase/auth";
 import { useEffect, useState, useCallback, useContext } from "react";
 import debounce from "lodash/debounce";
-import { Button, Input, useToast, VStack } from "@chakra-ui/react";
+import { Box, Button, Image, Input, useToast, VStack } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
-export default function Enter(props) {
+export default function Enter() {
+  const router=useRouter()
   const { user, username } = useContext(UserContext);
 
   // 1. user signed out <SignInButton />
   // 2. user signed in, but missing username <UsernameForm />
   // 3. user signed in, has username <SignOutButton />
   return (
-    <VStack>
+    <VStack mt={'20%'}>
       {user ? (
         !username ? (
           <UsernameForm />
@@ -38,20 +40,20 @@ function SignInButton() {
         title: "welcome to HotTakes",
         duration: 2000,
       });
+      router.push('/')
+      
     } catch (error) {}
   };
 
   return (
     <Button className="btn-google" onClick={signInWithGoogle}>
-      <img src={"/google.png"} width="30px" /> Sign in with Google
+      <Image alt="" src={"/google.png"} width="30px" /> Sign in with Google
     </Button>
   );
 }
 
 // Sign out button
-function SignOutButton() {
-  return <Button onClick={() => auth.signOut()}>Sign Out</Button>;
-}
+
 
 // Username form
 function UsernameForm() {
@@ -127,7 +129,7 @@ function UsernameForm() {
 
   return (
     !username && (
-      <section>
+      <Box>
         <h3>Choose Username</h3>
         <form onSubmit={onSubmit}>
           <Input
@@ -154,7 +156,7 @@ function UsernameForm() {
             Username Valid: {isValid.toString()}
           </div>
         </form>
-      </section>
+      </Box>
     )
   );
 }

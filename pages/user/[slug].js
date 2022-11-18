@@ -31,16 +31,7 @@ import {
 
 import { UserContext } from "../../lib/context";
 
-export async function getServerSideProps() {
-  const collectionRef = collection(db, "posts");
-  const q = query(collectionRef, where("user", "==", user.uid));
-  const data = onSnapshot(q, (snapshot) => {
-    snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-  });
- 
-  return {props:{data}}
-} 
-export default function Welcomeuser({data}) {
+export default function Welcomeuser() {
   const navigate = useRouter();
 
   const { username } = useContext(UserContext);
@@ -50,16 +41,13 @@ export default function Welcomeuser({data}) {
   const getData = async () => {
     if (loading) return;
     if (!user) return navigate.push("/enter");
-    settakes(data)
-    
-    
 
-    // const collectionRef = collection(db, "posts");
-    // const q = query(collectionRef, where("user", "==", user.uid));
-    // const unsubscribe = onSnapshot(q, (snapshot) => {
-    //   settakes(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    // });
-    // return unsubscribe;
+    const collectionRef = collection(db, "posts");
+    const q = query(collectionRef, where("user", "==", user.uid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      settakes(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    });
+    return unsubscribe;
   };
 
   // use effect is because on initial page load the user may not have been loaded yet so when it changes the useeffect will re-run
@@ -67,7 +55,6 @@ export default function Welcomeuser({data}) {
 
   useEffect(() => {
     getData();
-    console.log("data:", takes);
   }, [user]);
 
   // useEffect(() => {
@@ -91,9 +78,9 @@ export default function Welcomeuser({data}) {
     <>
       <HStack>
         <VStack w={"100%"}>
-          {takes.length == 0
+          {takes?.length == 0
             ? "you dont have any takes"
-            : takes.map((doc) => (
+            : takes?.map((doc) => (
                 <HotTakes
                   key={doc.id}
                   postUsername={doc.username}

@@ -47,7 +47,9 @@ export default function Navbar() {
               <Link href={"/admin/takes"}>
                 <Button>Create Takes</Button>
               </Link>
-              <Link href={`/user/${username}`}>
+              <Link href={{pathname:`/user/${username}`,
+            query:{uid:user.uid}
+            }}>
                 <Image
                   cursor={"pointer"}
                   borderRadius={"50%"}

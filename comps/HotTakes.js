@@ -172,8 +172,6 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     getNumberOfLikes();
   }, []);
 
-  
-  
   return (
     <>
       <VStack>

@@ -1,21 +1,27 @@
 import {
+  Avatar,
   Box,
   Button,
   Flex,
   Heading,
   IconButton,
   Image,
+  Input,
+  Tag,
+  TagLabel,
   Text,
 } from "@chakra-ui/react";
+
 import Link from "next/link";
 import { signOut } from "firebase/auth";
 import { useContext } from "react";
 import { UserContext } from "../lib/context";
 import { auth } from "../lib/firebase";
-import { AddIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import { AddIcon, PlusSquareIcon, SearchIcon } from "@chakra-ui/icons";
 
 export default function Navbar() {
   const { user, username } = useContext(UserContext);
+
   return (
     <>
       <Flex
@@ -27,15 +33,10 @@ export default function Navbar() {
         top={0}
         left={0}
         p={5}
-        zIndex={999
-        }
-        bg={'blackAlpha.800'}
-
-      
-       
+        zIndex={999}
+        bg={"blackAlpha.800"}
       >
         <Flex cursor={"pointer"}>
-          <Image />
           <Link href={"/"}>
             <Heading color={"#f7a110 "}>Hot</Heading>
           </Link>
@@ -45,7 +46,7 @@ export default function Navbar() {
         </Flex>
 
         <Flex
-          w={["50%", "40%", "30%"]}
+          w={["60%", "50%", "40%"]}
           alignItems={"center"}
           justifyContent={!username ? "flex-end" : "space-around"}
         >
@@ -59,18 +60,31 @@ export default function Navbar() {
           {username && (
             <>
               <Link href={"/admin/takes"}>
-                <IconButton transition={'.5s ease'} _hover={{
-    backgroundColor: "black",
-    color: "teal.500",
-  }}  isRound mr={2} colorScheme={"gray"} icon={<AddIcon />} />
+                <IconButton
+                  transition={".5s ease"}
+                  _hover={{
+                    backgroundColor: "black",
+                    color: "teal.500",
+                  }}
+                  isRound
+                  mr={2}
+                  colorScheme={"gray"}
+                  icon={<AddIcon />}
+                />
               </Link>
               <Link href={{ pathname: `/user/${username}` }}>
-                <Image
-                  cursor={"pointer"}
-                  borderRadius={"50%"}
-                  w={10}
-                  src={user?.photoURL}
-                />
+              
+                <Tag cursor={'pointer'} size='lg' colorScheme='blue' borderRadius='full'>
+  <Avatar
+  
+    src={user?.photoURL}
+    size='xs'
+    name={user.username}
+    ml={-1}
+    mr={2}
+  />
+  <TagLabel flexShrink={0}>{username}</TagLabel>
+</Tag>
               </Link>
               <Link href={"/"}>
                 <Button

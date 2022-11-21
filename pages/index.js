@@ -16,7 +16,8 @@ import PostFeed from "../comps/PostFeed";
 import { auth, db } from "../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
-import { Box, Button, Heading, SkeletonCircle, SkeletonText, Spinner, Stack, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, HStack, Progress, SkeletonCircle, SkeletonText, Spinner, Stack, Tag, TagCloseButton, TagLabel, Text, VStack } from "@chakra-ui/react";
+import Loader from "../comps/Loader";
 
 export default function Home() {
   const [user] = useAuthState(auth);
@@ -24,17 +25,20 @@ export default function Home() {
   const [lastDoc, setlastDoc] = useState([]);
   const [loading, setloading] = useState(false);
   const [endReached, setendReached] = useState(false);
-  const [showSkeleton, setshowSkeleton] = useState(false)
+  const [showSkeleton, setshowSkeleton] = useState(true)
 
   const getPosts = async () => {
-    setshowSkeleton(true)
+    
     const collectionRef = collection(db, "posts");
     const q = query(collectionRef, orderBy("timestamp", "desc"), limit(4));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAllPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       const lastVisible = snapshot.docs[snapshot.docs.length - 1];
       setlastDoc(lastVisible);
-      setshowSkeleton(false)
+      setTimeout(() => {
+        setshowSkeleton(false)
+      }, 1500);
+      
     });
 
     return unsubscribe;
@@ -87,6 +91,7 @@ export default function Home() {
 
     // rerun when user is present
   }, [user]);
+
   return (
     <>
       <Head>
@@ -95,22 +100,15 @@ export default function Home() {
         <link rel="icon" hrefnpm="/favicon.ico" />
       </Head>
       <main>
-{ showSkeleton?<Stack mt={'5%'} w={'100%'}>
-  <Box padding='6' boxShadow='lg' bg='white'>
-  <SkeletonCircle size='10' />
-  <SkeletonText mt='4' noOfLines={4} spacing='4' />
-</Box>
-<Box padding='6' boxShadow='lg' bg='white'>
-  <SkeletonCircle size='10' />
-  <SkeletonText mt='4' noOfLines={4} spacing='4' />
-</Box>
-<Box padding='6' boxShadow='lg' bg='white'>
-  <SkeletonCircle size='10' />
-  <SkeletonText mt='4' noOfLines={4} spacing='4' />
-</Box>
-</Stack>:
+{ showSkeleton?<Loader/>:
 
 <VStack mb={'5%'} mt={['15%','10%','7%']} >
+  
+<HStack m={5} spacing={10}>
+    
+  
+</HStack>
+ 
         <PostFeed posts={allPosts} />
         
           {loading ? <Spinner /> :endReached?<Heading> no more posts</Heading>: <Button colorScheme={'blue'} onClick={getMore}>more</Button>}

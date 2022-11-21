@@ -6,6 +6,7 @@ import {
   EditablePreview,
   ScaleFade,
 } from "@chakra-ui/react";
+import { AnimatePresence } from "framer-motion";
 import {
   Box,
   Button,
@@ -75,6 +76,7 @@ import {
 } from "@chakra-ui/react";
 import MenuBtn from "./MenuBtn";
 import HotTakeLayout from "./HotTakeLayout";
+import { animate, motion } from "framer-motion";
 
 const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   const toast = useToast();
@@ -203,119 +205,143 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     getNumberOfDisLikes();
     getNumberOfLikes();
   }, []);
+  const isEditableVariant={
+    initial:{
+opacity:0,y:-20,scale:.7
+    },
+    animate:{
+      opacity:1,y:0,scale:1
+
+    },
+    transition:{
+ease:'easeOut'
+    },
+
+    
+  }
 
   return (
     <>
-      <VStack>
-        <HotTakeLayout likeCount={likeCount} total={total} dislikeCount={dislikeCount} >
-          <VStack
-            p={1}
-            w={"100%"}
-            
-          >
-            {postUsername == ourUsername ? (
-              <>
-                <MenuBtn
-                  setisEditable={setisEditable}
-                  takeId={takeId}
-                  canComment={canComment}
-                />
-              </>
-            ) : (
-              <></>
-            )}
-
-            {postUsername && (
-              <>
-                <Text>
-                  <i> @{postUsername}</i>
-                </Text>
-              </>
-            )}
-
-            <Flex
-              w={[300, 350, 400, 500, 700]}
-              justifyContent={"space-around"}
-              alignItems={"center"}
-              h={"fit-content"}
+      <>
+        <VStack>
+          <HotTakeLayout likeCount={likeCount} total={total} dislikeCount={dislikeCount} >
+            <VStack
+            as={motion.div}
+        
+              p={1}
+              w={"100%"}
+              layout
+        
             >
-              <HStack>
-                <Text
-                  cursor={"pointer"}
-                  onClick={UpVote}
-                  fontSize={["2.5rem", "3rem"]}
-                >
-                  👍
-                </Text>
-                <Stat>
-                  <StatNumber>{likeCount}</StatNumber>
-                  <StatHelpText>
-                    <StatArrow type="increase" />
-                    {likeCount ? ((likeCount / total) * 100).toFixed(1) : "0"}%
-                  </StatHelpText>
-                </Stat>
-              </HStack>
-
-              {isEditable ? (
+              {postUsername == ourUsername ? (
                 <>
-                  <Input
-                    onChange={(e) => setformValue(e.target.value)}
-                    isInvalid={formValue.length == 0}
-                    value={formValue}
-                    type={"text"}
+                  <MenuBtn
+                    setisEditable={setisEditable}
+                    takeId={takeId}
+                    canComment={canComment}
                   />
-                  
                 </>
               ) : (
-                <Heading
-                  size={["md", "lg"]}
-                  w={"100%"}
-                  flexWrap={"wrap"}
-                  textAlign={"center"}
-                >
-                  {take}
-                </Heading>
+                <></>
               )}
-
-              <HStack>
-                <Text
-                  cursor={"pointer"}
-                  onClick={DownVote}
-                  fontSize={["2.5rem", "3rem"]}
-                >
-                  👎
-                </Text>{" "}
-                <Stat>
-                  <StatNumber>{dislikeCount}</StatNumber>
-                  <StatHelpText>
-                    <StatArrow type="decrease" />
-                    {dislikeCount
-                      ? ((dislikeCount / total) * 100).toFixed(1)
-                      : "0"}
-                    %
-                  </StatHelpText>
-                </Stat>
-              </HStack>
-            </Flex>
-            {isEditable ? (
-              <HStack>
-                <IconButton
-                  onClick={editTake}
-                  colorScheme={"green"}
-                  icon={<CheckIcon />}
-                />
-                <IconButton
-                  onClick={() => setisEditable(false)}
-                  colorScheme={"red"}
-                  icon={<CloseIcon />}
-                />
-              </HStack>
-            ) : (
-              <Comments takeId={takeId} canComment={canComment} />
-            )}
-          </VStack>
-        </HotTakeLayout>
-      </VStack>
+              {postUsername && (
+                <>
+                  <Text>
+                    <i> @{postUsername}</i>
+                  </Text>
+                </>
+              )}
+              <Flex
+                w={[300, 350, 400, 500, 700]}
+                justifyContent={"space-around"}
+                alignItems={"center"}
+                h={"fit-content"}
+              >
+                <HStack>
+                  <Text
+                  as={motion.p}
+                  whileTap={{ scale: 1.4,y:-20 }}
+                    cursor={"pointer"}
+                    onClick={UpVote}
+                    fontSize={["2.5rem", "3rem"]}
+                  >
+                    👍
+                  </Text>
+                  <Stat>
+                    <StatNumber>{likeCount}</StatNumber>
+                    <StatHelpText>
+                      <StatArrow type="increase" />
+                      {likeCount ? ((likeCount / total) * 100).toFixed(1) : "0"}%
+                    </StatHelpText>
+                  </Stat>
+                </HStack>
+                {isEditable ? (
+                  <AnimatePresence>
+                    <Input
+                    key={takeId}
+                    as={motion.input}{... isEditableVariant}
+                      onChange={(e) => setformValue(e.target.value)}
+                      isInvalid={formValue.length == 0}
+                      value={formValue}
+                      type={"text"}
+                    />
+        
+                  </AnimatePresence>
+                ) : (
+                  <Heading
+                    size={["md", "lg"]}
+                    w={"100%"}
+                    flexWrap={"wrap"}
+                    textAlign={"center"}
+                  >
+                    {take}
+                  </Heading>
+                )}
+                <HStack>
+                  <Text
+                  as={motion.p}
+                  whileTap={{ scale: 1.4,y:10 }}
+                  transition={{duration:2}}
+                    cursor={"pointer"}
+                    onClick={DownVote}
+                    fontSize={["2.5rem", "3rem"]}
+                  >
+                    👎
+                  </Text>{" "}
+                  <Stat>
+                    <StatNumber>{dislikeCount}</StatNumber>
+                    <StatHelpText>
+                      <StatArrow type="decrease" />
+                      {dislikeCount
+                        ? ((dislikeCount / total) * 100).toFixed(1)
+                        : "0"}
+                      %
+                    </StatHelpText>
+                  </Stat>
+                </HStack>
+              </Flex>
+              {isEditable ? (
+                <AnimatePresence>
+                  <HStack key={takeId} as={motion.div}{... isEditableVariant}>
+                    <IconButton
+                      onClick={editTake}
+                      colorScheme={"green"}
+                      icon={<CheckIcon />}
+                    />
+                    <IconButton
+                      onClick={() => setisEditable(false)}
+                      colorScheme={"red"}
+                      icon={<CloseIcon />}
+                    />
+                  </HStack>
+                </AnimatePresence>
+              ) : (
+                <Comments takeId={takeId} canComment={canComment} />
+              )}
+            </VStack>
+          </HotTakeLayout>
+        </VStack>
+      </>
     </>
   );
 };

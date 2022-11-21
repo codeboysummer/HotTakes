@@ -76,8 +76,8 @@ export default function Welcomeuser() {
 
   return (
     <>
-      <HStack>
-        <VStack w={"100%"} mt={'10%'}>
+      < >
+        <VStack  mb={'5%'} mt={['15%','10%','7%']} >
           {takes?.length == 0
             ? "you dont have any takes"
             : takes?.map((doc) => (
@@ -90,7 +90,7 @@ export default function Welcomeuser() {
                 />
               ))}
         </VStack>
-      </HStack>
+      </>
     </>
   );
 }

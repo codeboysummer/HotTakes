@@ -10,4 +10,20 @@ body {
   margin-top: 4rem;
 
   }
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 
+}
+/* Track */
+::-webkit-scrollbar-track {
+  /* border-radius: 5px; */
+  background-color: black;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background:purple;
+  /* border-radius: 5px 0 0 5px; */
+  /* box-shadow: inset 5px -5px 5px rgba(58, 114, 60, 1); */
+}

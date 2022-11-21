@@ -60,13 +60,16 @@ const Comments = ({ canComment, takeId }) => {
   const btnRef = React.useRef();
   const [user] = useAuthState(auth);
   const toast = useToast();
+  const [loading, setloading] = useState(false)
   const { username } = useContext(UserContext);
   const getComments = async () => {
     try {
+      setloading(true)
       const docRef = doc(db, "posts", takeId);
       onSnapshot(docRef, (snapshot) => {
         const postCommentsArray = snapshot?.data()?.postComments;
         setpostComments(postCommentsArray?.reverse());
+        setloading(false)
       });
     } catch (error) {
       console.log(error);
@@ -110,24 +113,7 @@ const Comments = ({ canComment, takeId }) => {
       console.log(error);
     }
   };
-  const leadingActions = () => (
-    <LeadingActions>
-      <SwipeAction onClick={() => console.info("swipe action triggered")}>
-        Action name
-      </SwipeAction>
-    </LeadingActions>
-  );
-
-  const trailingActions = () => (
-    <TrailingActions>
-      <SwipeAction
-        destructive={true}
-        onClick={() => console.info("swipe action triggered")}
-      >
-        Delete
-      </SwipeAction>
-    </TrailingActions>
-  );
+ 
   return (
     <>
       <HStack>
@@ -181,7 +167,16 @@ const Comments = ({ canComment, takeId }) => {
           </>
           <DrawerBody>
             <VStack>
-              {postComments?.map((comment, i) => (
+              {loading?<>
+                <Box padding='6' boxShadow='lg' bg='white'>
+  <SkeletonCircle size='10' />
+  <SkeletonText mt='4' noOfLines={4} spacing='4' />
+</Box>
+<Box padding='6' boxShadow='lg' bg='white'>
+  <SkeletonCircle size='10' />
+  <SkeletonText mt='4' noOfLines={4} spacing='4' />
+</Box>
+              </>:postComments?.map((comment, i) => (
                 
                  
 

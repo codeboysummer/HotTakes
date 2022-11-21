@@ -2,6 +2,7 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import {useUserData} from '../lib/hooks'
 import Navbar from "../comps/navbar";
+import '../styles/globals.css'
 import { UserContext } from "../lib/context";
 import { db,auth } from "../lib/firebase";
 import { useState,useEffect } from "react";

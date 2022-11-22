@@ -91,7 +91,11 @@ const Comments = ({ canComment, takeId }) => {
       console.log(error);
     }
   };
-
+  const handleKeyDown = (e,) => {
+    if (e.key === 'Enter') {
+      HandleSubmitComment()
+    }
+  }
   useEffect(() => {
     getComments();
   }, [HandleSubmitComment]);
@@ -146,6 +150,7 @@ const Comments = ({ canComment, takeId }) => {
             <>
               <Flex p={2} alignSelf={'center'}  w={['100%','70%',"50%"]}>
                 <Input
+                onKeyDown={(e)=>handleKeyDown(e)}
                 
                   alignSelf={"center"}
                   disabled={!user}

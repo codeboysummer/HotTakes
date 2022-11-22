@@ -127,6 +127,11 @@ return;
       return navigate.push("/");
     }
   };
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      submitTake()
+    }
+  }
 
   return (
     <VStack h={"50vh"} display={"grid"} placeItems={"center"}>
@@ -150,6 +155,10 @@ return;
               </Stat>
             </HStack>
             <Input
+            onKeyDown={handleKeyDown}
+
+
+            
               value={take.take}
               onChange={(e) => {
                 settake(e.target.value)
@@ -184,7 +193,7 @@ return;
           />
           <Text>Comments</Text>
         </HStack>
-        <Button onClick={submitTake} size={"lg"} colorScheme={"blue"}>
+        <Button  onClick={submitTake} size={"lg"} colorScheme={"blue"}>
           Submit
         </Button>
       </VStack>

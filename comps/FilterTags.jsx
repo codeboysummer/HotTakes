@@ -4,15 +4,17 @@ import React from "react";
 import FilterTag from "./FilterTag";
 import { motion } from "framer-motion";
 
-const FilterTags = () => {
-  
+const FilterTags = ({CommentFilter}) => {
+
+
   return (
     <HStack as={motion.div} layout>
+      
         <Text color={'gray.400'} pr={5}><>Filter</> <SettingsIcon/></Text>
       <FilterTag  color={"red"} title={"Most Hated"} />
       <FilterTag color={"green"} title={"Most Loved"} />
       <FilterTag color={"purple"} title={"Oldest"} />
-      <FilterTag color={"pink"} title={"With Comments"} />
+      <FilterTag CommentFilter={CommentFilter} color={"pink"} title={"With Comments"} />
       
     </HStack>
   );

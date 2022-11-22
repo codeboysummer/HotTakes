@@ -6,7 +6,8 @@ export default function PostFeed({ posts }) {
   return (
     <>
       <>
-     <FilterTags/>
+     
+
         {posts?.map((post) => {
           const postId = post.id;
           return (

@@ -16,8 +16,26 @@ import PostFeed from "../comps/PostFeed";
 import { auth, db } from "../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
-import { Box, Button, Flex, Heading, HStack, Progress, SkeletonCircle, SkeletonText, Spinner, Stack, Tag, TagCloseButton, TagLabel, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  HStack,
+  Progress,
+  SkeletonCircle,
+  SkeletonText,
+  Spinner,
+  Stack,
+  Tag,
+  TagCloseButton,
+  TagLabel,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { Timestamp } from "firebase/firestore";
 import Loader from "../comps/Loader";
+import FilterTags from "../comps/FilterTags";
 
 export default function Home() {
   const [user] = useAuthState(auth);
@@ -25,27 +43,43 @@ export default function Home() {
   const [lastDoc, setlastDoc] = useState([]);
   const [loading, setloading] = useState(false);
   const [endReached, setendReached] = useState(false);
-  const [showSkeleton, setshowSkeleton] = useState(true)
-
+  const [showSkeleton, setshowSkeleton] = useState(true);
+  const [orignalPosts, setorignalPosts] = useState([]);
+const [active, setactive] = useState(false)
   const getPosts = async () => {
-    
     const collectionRef = collection(db, "posts");
     const q = query(collectionRef, orderBy("timestamp", "desc"), limit(4));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAllPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      setorignalPosts(
+        snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+      );
       const lastVisible = snapshot.docs[snapshot.docs.length - 1];
       setlastDoc(lastVisible);
+
       setTimeout(() => {
-        setshowSkeleton(false)
+        setshowSkeleton(false);
       }, 1500);
-      
     });
 
     return unsubscribe;
   };
 
+function TimeFilter(){
+  
+  console.log(allPosts.reverse());
+
+}
+  function CommentFilter(active) {
+    if (active) {
+      return setAllPosts(allPosts.filter((item) => item.canComment));
+    }
+    setAllPosts(orignalPosts);
+  }
+
   const getMore = async () => {
     try {
+      
       setloading(true);
       const collectionRef = collection(db, "posts");
       const q = query(
@@ -59,22 +93,14 @@ export default function Home() {
         setAllPosts([
           ...allPosts,
           ...snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
-
-        ]
-
-        
-        
-        );
+        ]);
 
         console.log(snapshot.docs.length);
-        if (snapshot.docs.length==0) {
-          setendReached(true)
-          
+        if (snapshot.docs.length == 0) {
+          setendReached(true);
         } else {
-          setendReached(false)
-          
+          setendReached(false);
         }
-       
 
         const lastVisible = snapshot.docs[snapshot.docs.length - 1];
         setlastDoc(lastVisible);
@@ -100,20 +126,27 @@ export default function Home() {
         <link rel="icon" hrefnpm="/favicon.ico" />
       </Head>
       <main>
-{ showSkeleton?<Loader/>:
+        {showSkeleton ? (
+          <Loader />
+        ) : (
+          <VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
+            <HStack m={5} spacing={10}></HStack>
+            
+            <FilterTags CommentFilter={CommentFilter} />
+            <Button onClick={TimeFilter}></Button>
+            <PostFeed posts={allPosts} />
 
-<VStack mb={'5%'} mt={['15%','10%','7%']} >
-  
-<HStack m={5} spacing={10}>
-    
-  
-</HStack>
- 
-        <PostFeed posts={allPosts} />
-        
-          {loading ? <Spinner /> :endReached?<Heading> no more posts</Heading>: <Button colorScheme={'blue'} onClick={getMore}>more</Button>}
-
-        </VStack>}
+            {loading ? (
+              <Spinner />
+            ) : endReached ? (
+              <Heading> no more posts</Heading>
+            ) : (
+              <Button colorScheme={"blue"} onClick={getMore}>
+                more
+              </Button>
+            )}
+          </VStack>
+        )}
       </main>
     </>
   );

@@ -3,21 +3,16 @@ import React,{useState} from "react";
 import {SmallAddIcon} from '@chakra-ui/icons'
 import { motion } from "framer-motion";
 
-const FilterTag = ({ color, title,currentState,setState }) => {
+const FilterTag = ({ color, title,CommentFilter  }) => {
   
   const [active, setactive] = useState(false)
-  const filter= () => {
-    currentState.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-
-  
-   
-  }
+ 
 
 
 
 
   return (
-    <Tag layout as={motion.span} cursor={'pointer'} onClick={()=>{setactive(!active)}} size={['sm','md',"lg"]} variant={"solid"} colorScheme={active?color:'gray'}>
+    <Tag layout as={motion.span} cursor={'pointer'} onClick={()=>{setactive(!active),CommentFilter(active)}} size={['sm','md',"lg"]} variant={"solid"} colorScheme={active?color:'gray'}>
       <HStack >
         <TagLabel>{title}</TagLabel>
              {active && <TagCloseButton />}

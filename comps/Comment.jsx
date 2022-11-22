@@ -1,6 +1,6 @@
 import { CloseIcon } from "@chakra-ui/icons";
 
-import { Box, Divider, Flex, Image, Text, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Divider, Flex, Image, Tag, TagLabel, Text, useToast } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { UserContext } from "../lib/context";
@@ -21,21 +21,18 @@ const {user}=useContext(UserContext)
           alignItems={["flex-start", "center", "center"]}
         >
           <>
-            <Image
-              w={[8, 10, 10]}
-              h={[8, 10, 10]}
-              borderRadius={"50%"}
-              marginLeft={"right"}
-              src={comment.avatar}
-            />
-            {
-              <Text>
-                @
-                <b>
-                  <i>{comment.username}</i>
-                </b>
-              </Text>
-            }
+          <Tag cursor={'pointer'} size='lg' colorScheme='blue' borderRadius='full'>
+  <Avatar
+  
+    src={user?.photoURL}
+    size='xs'
+    name={user.username}
+    ml={-1}
+    mr={2}
+  />
+  <TagLabel flexShrink={0}>@{comment.username}</TagLabel>
+</Tag>
+            
             <Text overflow={"hidden"} w={"80%"}>
               {comment.comment}
             </Text>

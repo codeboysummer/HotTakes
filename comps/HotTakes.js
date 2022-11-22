@@ -50,8 +50,7 @@ import {
   CloseIcon,
   DragHandleIcon,
 } from "@chakra-ui/icons";
-import UpVoteButton from "./UpVoteButton";
-import DownVoteButton from "./DownVoteButton";
+
 import { UserContext } from "../lib/context";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../lib/firebase";

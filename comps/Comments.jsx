@@ -51,7 +51,6 @@ import {
 import { useDocument } from "react-firebase-hooks/firestore";
 import { UserContext } from "../lib/context";
 import Comment from "./Comment";
-import SwipeAbleComponent from "./SwipeAbleComponent";
 const Comments = ({ canComment, takeId }) => {
   const screenWidth = window.screen.width;
   const [comment, setcomment] = useState("");
@@ -147,6 +146,7 @@ const Comments = ({ canComment, takeId }) => {
             <>
               <Flex p={2} alignSelf={'center'}  w={['100%','70%',"50%"]}>
                 <Input
+                
                   alignSelf={"center"}
                   disabled={!user}
                   onChange={(e) => {

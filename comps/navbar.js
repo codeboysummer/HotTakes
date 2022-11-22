@@ -57,7 +57,7 @@ export default function Navbar() {
               </Link>
             </>
           )}
-          {username && (
+          {username && user&& (
             <>
               <Link href={"/admin/takes"}>
                 <IconButton

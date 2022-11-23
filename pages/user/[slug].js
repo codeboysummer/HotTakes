@@ -30,6 +30,7 @@ import {
 } from "@chakra-ui/react";
 
 import { UserContext } from "../../lib/context";
+import Loader from "../../comps/Loader";
 
 export default function Welcomeuser() {
   const navigate = useRouter();
@@ -37,9 +38,10 @@ export default function Welcomeuser() {
   const { username } = useContext(UserContext);
   const [user, loading] = useAuthState(auth);
   const [takes, settakes] = useState([]);
-
+const [showLoader, setshowLoader] = useState(false)
   const getData = async () => {
-    if (loading) return;
+setshowLoader(true)
+    if (loading) return ;
     if (!user) return navigate.push("/enter");
 
     const collectionRef = collection(db, "posts");
@@ -47,6 +49,9 @@ export default function Welcomeuser() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       settakes(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     });
+    setTimeout(() => {
+      setshowLoader(false)
+    }, 1000);
     return unsubscribe;
   };
 
@@ -54,6 +59,9 @@ export default function Welcomeuser() {
   // giving fresh data
 
   useEffect(() => {
+    if (!user) {
+      navigate.push("/enter");
+    }
     getData();
   }, [user]);
 
@@ -76,8 +84,8 @@ export default function Welcomeuser() {
 
   return (
     <>
-      < >
-        <VStack  mb={'5%'} mt={['15%','10%','7%']} >
+      <>
+        { showLoader?<Loader/>:<VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
           {takes?.length == 0
             ? "you dont have any takes"
             : takes?.map((doc) => (
@@ -89,7 +97,7 @@ export default function Welcomeuser() {
                   takeId={doc.id}
                 />
               ))}
-        </VStack>
+        </VStack>}
       </>
     </>
   );

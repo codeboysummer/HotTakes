@@ -4,12 +4,19 @@ import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { signInWithPopup } from "firebase/auth";
 import { useEffect, useState, useCallback, useContext } from "react";
 import debounce from "lodash/debounce";
-import { Box, Button, Image, Input, useToast, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, Image, Input, useToast, VStack } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
 export default function Enter() {
-  const router=useRouter()
+  const route=useRouter()
   const { user, username } = useContext(UserContext);
+  useEffect(() => {
+    if(username){
+      route.push('/')
+
+    }
+    
+  }, [username])
 
   // 1. user signed out <SignInButton />
   // 2. user signed in, but missing username <UsernameForm />
@@ -18,12 +25,15 @@ export default function Enter() {
     <VStack mt={'20%'}>
       {user ? (
         !username ? (
-          <UsernameForm />
+          <UsernameForm  />
         ) : (
           <>hello {username}</>
         )
       ) : (
-        <SignInButton />
+        <VStack mt={'5%'}>
+          <Heading>Signin with google</Heading>
+          <SignInButton  />
+        </VStack>
       )}
     </VStack>
   );
@@ -40,7 +50,7 @@ function SignInButton() {
         title: "welcome to HotTakes",
         duration: 2000,
       });
-      router.push('/')
+     
       
     } catch (error) {}
   };
@@ -81,6 +91,7 @@ function UsernameForm() {
       batch.set(usernameDoc, { uid: user.uid });
 
       await batch.commit();
+
     } catch (error) {
       console.log(error);
     }
@@ -111,6 +122,8 @@ function UsernameForm() {
     checkUsername(formValue);
   }, [formValue]);
 
+  
+
   // Hit the database for username match after each debounced change
   // useCallback is required for debounce to work
   const checkUsername = useCallback(
@@ -119,7 +132,6 @@ function UsernameForm() {
         const ref = doc(db, `usernames/${username}`);
         const docSnap = await getDoc(ref);
         const exists = docSnap.exists();
-        console.log(exists);
         setIsValid(!exists);
         setLoading(false);
       }
@@ -147,13 +159,10 @@ function UsernameForm() {
             Choose
           </Button>
 
-          <h3>Debug State</h3>
+         
           <div>
             Username: {formValue}
-            <br />
-            Loading: {loading.toString()}
-            <br />
-            Username Valid: {isValid.toString()}
+            Username Valid: {isValid.toString()?'this username is ready to take':'this username is taken'}
           </div>
         </form>
       </Box>

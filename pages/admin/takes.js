@@ -6,13 +6,13 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import Take from "../../comps/Take";
+import CreateTake from "../../comps/CreateTake";
 import React from "react";
 
 const takes = () => {
   return (
  <VStack>
- <Take/>
+ <CreateTake/>
  </VStack>
   );
 };

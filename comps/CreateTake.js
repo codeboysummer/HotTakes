@@ -35,7 +35,7 @@ import {
   collection,
   setDoc,
 } from "firebase/firestore";
-const Take = () => {
+const CreateTake = () => {
   const [take, settake] = useState({ take: "" });
   const navigate = useRouter();
   const {username}  = useContext(UserContext)
@@ -138,7 +138,7 @@ return;
       <VStack>
         <>
           <Flex
-            w={[200, 500, 700]}
+            w={['100vw','70vw','50vw']}
             gap={3}
             justifyContent={"space-around"}
             alignItems={"center"}
@@ -201,4 +201,4 @@ return;
   );
 };
 
-export default Take;
+export default CreateTake;

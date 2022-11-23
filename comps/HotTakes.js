@@ -131,7 +131,6 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     const collectionRef = collection(db, `posts/${takeId}/upvote/`);
     const q = query(collectionRef);
     const collectionDoc = await getDocs(q);
-    console.log("likes", collectionDoc.size);
     return setlikeCount(collectionDoc.size);
   };
   const DownVote = async () => {
@@ -154,14 +153,13 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
 
       if (upVoteDoc.exists()) {
         await deleteDoc(upVoteDocRef);
-        console.log("upvote exists");
         getNumberOfLikes();
       }
 
       if (downVoteDoc.exists()) {
         toast({
           status: "error",
-          title: "you already liked this",
+          title: "you already Disliked this",
           duration: 1000,
         });
         return;
@@ -179,7 +177,6 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     const collectionRef = collection(db, `posts/${takeId}/downvote/`);
     const q = query(collectionRef);
     const collectionDoc = await getDocs(q);
-    console.log("dislikes", collectionDoc.size);
 
     return setdislikeCount(collectionDoc.size);
   };
@@ -229,6 +226,7 @@ ease:'easeOut'
         
               p={1}
               w={"100%"}
+              
               layout
         
             >
@@ -251,29 +249,32 @@ ease:'easeOut'
                 </>
               )}
               <Flex
-                w={[300, 350, 400, 500, 700]}
+                // w={[300, 350, 400, 500, 700]}
+                w={['90vw',400, 500, 700]}
+                height={'100%'}
                 justifyContent={"space-around"}
                 alignItems={"center"}
-                h={"fit-content"}
+                // h={"fit-content"}
               >
-                <HStack>
+                {<VStack  >
                   <Text
+
                   as={motion.p}
                   whileTap={{ scale: 1.4,y:-20 }}
                     cursor={"pointer"}
                     onClick={UpVote}
-                    fontSize={["2.5rem", "3rem"]}
+                    fontSize={["2.4rem", "3rem"]}
                   >
                     👍
                   </Text>
-                  <Stat>
-                    <StatNumber>{likeCount}</StatNumber>
+                  <Stat >
+                    <StatNumber textAlign={'center'}>{likeCount}</StatNumber>
                     <StatHelpText>
                       <StatArrow type="increase" />
                       {likeCount ? ((likeCount / total) * 100).toFixed(1) : "0"}%
                     </StatHelpText>
                   </Stat>
-                </HStack>
+                </VStack>}
                 {isEditable ? (
                   <AnimatePresence>
                     <Input
@@ -288,15 +289,15 @@ ease:'easeOut'
                   </AnimatePresence>
                 ) : (
                   <Heading
-                    size={["md", "lg"]}
-                    w={"100%"}
+                    size={['sm',"md", "lg"]}
+                    w={["100%",'80%','70%']}
                     flexWrap={"wrap"}
                     textAlign={"center"}
                   >
                     {take}
                   </Heading>
                 )}
-                <HStack>
+               { <VStack>
                   <Text
                   as={motion.p}
                   whileTap={{ scale: 1.4,y:10 }}
@@ -308,7 +309,7 @@ ease:'easeOut'
                     👎
                   </Text>{" "}
                   <Stat>
-                    <StatNumber>{dislikeCount}</StatNumber>
+                    <StatNumber  textAlign={'center'}>{dislikeCount}</StatNumber>
                     <StatHelpText>
                       <StatArrow type="decrease" />
                       {dislikeCount
@@ -317,7 +318,7 @@ ease:'easeOut'
                       %
                     </StatHelpText>
                   </Stat>
-                </HStack>
+                </VStack>}
               </Flex>
               {isEditable ? (
                 <AnimatePresence>

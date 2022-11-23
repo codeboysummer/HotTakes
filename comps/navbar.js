@@ -32,7 +32,7 @@ export default function Navbar() {
         pos={"fixed"}
         top={0}
         left={0}
-        p={5}
+        p={2}
         zIndex={999}
         bg={"blackAlpha.800"}
       >
@@ -46,9 +46,9 @@ export default function Navbar() {
         </Flex>
 
         <Flex
-          w={["60%", "50%", "40%"]}
+          w={["60%", "50%", "30%"]}
           alignItems={"center"}
-          justifyContent={!username ? "flex-end" : "space-around"}
+          justifyContent={!username ? "flex-end" : "space-between"}
         >
           {!username && (
             <>
@@ -57,7 +57,7 @@ export default function Navbar() {
               </Link>
             </>
           )}
-          {username && user&& (
+          {username && user && (
             <>
               <Link href={"/admin/takes"}>
                 <IconButton
@@ -67,27 +67,31 @@ export default function Navbar() {
                     color: "teal.500",
                   }}
                   isRound
-                  mr={2}
+                  
                   colorScheme={"gray"}
                   icon={<AddIcon />}
                 />
               </Link>
               <Link href={{ pathname: `/user/${username}` }}>
-              
-                <Tag cursor={'pointer'} size='lg' colorScheme='blue' borderRadius='full'>
-  <Avatar
-  
-    src={user?.photoURL}
-    size='xs'
-    name={user.username}
-    ml={-1}
-    mr={2}
-  />
-  <TagLabel flexShrink={0}>{username}</TagLabel>
-</Tag>
+                <Tag
+                  cursor={"pointer"}
+                  size="lg"
+                  colorScheme="blue"
+                  borderRadius="full"
+                >
+                  <Avatar
+                    src={user?.photoURL}
+                    size="xs"
+                    name={user.username}
+                    ml={-1}
+                    mr={2}
+                  />
+                  <TagLabel flexShrink={0}>{username}</TagLabel>
+                </Tag>
               </Link>
               <Link href={"/"}>
                 <Button
+                size={['sm','md']}
                   onClick={() => signOut(auth)}
                   colorScheme={"purple"}
                   type="ghost"

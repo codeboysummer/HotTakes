@@ -31,29 +31,31 @@ import {
   TagCloseButton,
   TagLabel,
   Text,
+  Toast,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { Timestamp } from "firebase/firestore";
 import Loader from "../comps/Loader";
 import FilterTags from "../comps/FilterTags";
+import { useRouter } from "next/router";
 
 export default function Home() {
+  const route=useRouter()
   const [user] = useAuthState(auth);
   const [allPosts, setAllPosts] = useState([]);
   const [lastDoc, setlastDoc] = useState([]);
   const [loading, setloading] = useState(false);
   const [endReached, setendReached] = useState(false);
   const [showSkeleton, setshowSkeleton] = useState(true);
-  const [orignalPosts, setorignalPosts] = useState([]);
-const [active, setactive] = useState(false)
+  const Toast=useToast()
+
   const getPosts = async () => {
     const collectionRef = collection(db, "posts");
     const q = query(collectionRef, orderBy("timestamp", "desc"), limit(4));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAllPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      setorignalPosts(
-        snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-      );
+      
       const lastVisible = snapshot.docs[snapshot.docs.length - 1];
       setlastDoc(lastVisible);
 
@@ -65,21 +67,15 @@ const [active, setactive] = useState(false)
     return unsubscribe;
   };
 
-function TimeFilter(){
-  
-  console.log(allPosts.reverse());
 
-}
-  function CommentFilter(active) {
-    if (active) {
-      return setAllPosts(allPosts.filter((item) => item.canComment));
-    }
-    setAllPosts(orignalPosts);
-  }
+  
 
   const getMore = async () => {
     try {
-      
+      if(!auth.currentUser){
+        return toast({title:'sorry to load more please signin ',duration:2000,status:'error'})
+      }
+
       setloading(true);
       const collectionRef = collection(db, "posts");
       const q = query(
@@ -95,7 +91,6 @@ function TimeFilter(){
           ...snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
         ]);
 
-        console.log(snapshot.docs.length);
         if (snapshot.docs.length == 0) {
           setendReached(true);
         } else {
@@ -107,12 +102,17 @@ function TimeFilter(){
       });
       setloading(false);
 
+
       return unsubscribe;
+
     } catch (error) {
       console.log(error);
     }
   };
   useEffect(() => {
+    if(!user){
+      route.push('/enter')
+    }
     getPosts();
 
     // rerun when user is present
@@ -132,8 +132,6 @@ function TimeFilter(){
           <VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
             <HStack m={5} spacing={10}></HStack>
             
-            <FilterTags CommentFilter={CommentFilter} />
-            <Button onClick={TimeFilter}></Button>
             <PostFeed posts={allPosts} />
 
             {loading ? (

@@ -7,7 +7,7 @@ const HotTakeLayout = ({ children,likeCount,dislikeCount,total }) => {
     const dislikePercentage=(dislikeCount/total)*100
   return (
     
-     <VStack  border={'4px solid black'} >
+     <VStack  border={'4px solid black'} overflow={'hidden'} >
        <Flex layout  w={'100%'}>
        <Box as={motion.div} layout bg={'green.400'} height={4} w={`${likePercentage}%`}></Box>
        <Box as={motion.div} layout  bg={'red.400'} height={4} w={`${dislikePercentage}%`}></Box>

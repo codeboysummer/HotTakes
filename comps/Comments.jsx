@@ -47,7 +47,9 @@ import {
   query,
   Timestamp,
   updateDoc,
+
 } from "firebase/firestore";
+import { motion } from "framer-motion";
 import { useDocument } from "react-firebase-hooks/firestore";
 import { UserContext } from "../lib/context";
 import Comment from "./Comment";
@@ -80,7 +82,6 @@ const Comments = ({ canComment, takeId }) => {
     const updatedArray = postComments?.filter(
       (postComment) => postComment !== comment
     );
-    console.log(updatedArray);
     setpostComments(updatedArray);
     try {
       const docRef = doc(db, `posts/${takeId}`);
@@ -170,7 +171,8 @@ const Comments = ({ canComment, takeId }) => {
               </Flex>
             </>
           </>
-          <DrawerBody>
+          <DrawerBody as={motion.div} layout>
+            
             <VStack>
               {loading?<>
                 <Box padding='6' boxShadow='lg' bg='white'>
@@ -181,7 +183,8 @@ const Comments = ({ canComment, takeId }) => {
   <SkeletonCircle size='10' />
   <SkeletonText mt='4' noOfLines={4} spacing='4' />
 </Box>
-              </>:postComments?.map((comment, i) => (
+              </>:
+              postComments?.map((comment, i) => (
                 
                  
 

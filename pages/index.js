@@ -142,26 +142,11 @@ export default function Home() {
     if(active){
     console.log('eh');
       console.log(allPosts.filter((item)=>item.canComment));
-      
+      return allPosts.filter((item)=>item.canComment)
 }
 else{
-  console.log(allPosts);
+ return allPosts
 }
-
-    
-// i need to mutate the array based on if cancomment propery is true 
-
-// first ill grab the actual piece of state which is all Posts
-// console.log( ); first so i can see where in the json the property is
-// now  we have all the commentable posts
-
-// we can set this to the state now and re-run when the state Changes and if the filter is active
-
-
-// 
-
-
-
   }
   useEffect(() => {
     if (!user) {
@@ -217,7 +202,7 @@ else{
                
             </HStack>
 
-            <PostFeed posts={allPosts} />
+            <PostFeed posts={noCommentsFilter()} />
 
             {endReached ? (
               <Heading> no more posts</Heading>

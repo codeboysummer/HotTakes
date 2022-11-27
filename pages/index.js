@@ -35,48 +35,84 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { Timestamp } from "firebase/firestore";
 import Loader from "../comps/Loader";
-import FilterTags from "../comps/FilterTags";
+
 import { useRouter } from "next/router";
+import FilterTag from "../comps/FilterTag";
 
 export default function Home() {
-  const route=useRouter()
+  const route = useRouter();
   const [user] = useAuthState(auth);
   const [allPosts, setAllPosts] = useState([]);
   const [lastDoc, setlastDoc] = useState([]);
-  const [loading, setloading] = useState(false);
   const [endReached, setendReached] = useState(false);
-  const [showSkeleton, setshowSkeleton] = useState(true);
-  const Toast=useToast()
+  const [Loading, setLoading] = useState(true);
+  const [TotalLength, setTotalLength] = useState(0);
+  const toast = useToast();
+  const [active, setactive] = useState(false)
+
+  // if (typeof window !== 'undefined') {
+  //     window.onscroll=function(){
+  //      if( window.innerHeight + window.scrollY >= document.body.offsetHeight){
+  //       console.log('bottom');
+  //       !endReached?getMore():''
+  //      }
+
+  //   }
+  // }
 
   const getPosts = async () => {
+    setendReached(false);
     const collectionRef = collection(db, "posts");
     const q = query(collectionRef, orderBy("timestamp", "desc"), limit(4));
+    // get four of the first from the posts collection
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAllPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      
+      // set these four to allPosts State
       const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+      // for firebase to keep track get the index of the last doc
+
       setlastDoc(lastVisible);
+      // save to a state variable
 
       setTimeout(() => {
-        setshowSkeleton(false);
+        setLoading(false);
       }, 1500);
     });
 
     return unsubscribe;
   };
 
+  // what im going to do is create a function that gets the total length on page load and set that to the state that
+  //needs to be compared to see if the end was truly reached
 
-  
+  const getAllPostsLength = async () => {
+    const collectionRef = collection(db, "posts");
+    const q = query(collectionRef, orderBy("timestamp", "desc"));
+    // constructed query
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      // take the entire array and get the length
+      setTotalLength(snapshot.docs.length);
+      console.log("total:", TotalLength);
+      // set length
+    });
+
+    return unsubscribe;
+  };
 
   const getMore = async () => {
     try {
-      if(!auth.currentUser){
-        return toast({title:'sorry to load more please signin ',duration:2000,status:'error'})
+      setendReached(false);
+
+      if (!auth.currentUser) {
+        return toast({
+          title: "sorry to load more please signin ",
+          duration: 2000,
+          status: "error",
+        });
       }
 
-      setloading(true);
       const collectionRef = collection(db, "posts");
       const q = query(
         collectionRef,
@@ -91,32 +127,76 @@ export default function Home() {
           ...snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
         ]);
 
-        if (snapshot.docs.length == 0) {
-          setendReached(true);
-        } else {
-          setendReached(false);
-        }
-
         const lastVisible = snapshot.docs[snapshot.docs.length - 1];
         setlastDoc(lastVisible);
       });
-      setloading(false);
-
 
       return unsubscribe;
-
     } catch (error) {
       console.log(error);
     }
   };
+  
+  const noCommentsFilter= ()=>{
+
+    if(active){
+    console.log('eh');
+      console.log(allPosts.filter((item)=>item.canComment));
+      
+}
+else{
+  console.log(allPosts);
+}
+
+    
+// i need to mutate the array based on if cancomment propery is true 
+
+// first ill grab the actual piece of state which is all Posts
+// console.log( ); first so i can see where in the json the property is
+// now  we have all the commentable posts
+
+// we can set this to the state now and re-run when the state Changes and if the filter is active
+
+
+// 
+
+
+
+  }
   useEffect(() => {
-    if(!user){
-      route.push('/enter')
+    if (!user) {
+      route.push("/enter");
     }
+
     getPosts();
 
     // rerun when user is present
   }, [user]);
+
+
+  useEffect(() => {
+    getAllPostsLength();
+    if (allPosts.length == TotalLength) {
+      setendReached(true);
+      console.log(allPosts.length, "==", TotalLength);
+    } else {
+      console.log(allPosts.length, "==", TotalLength);
+      setendReached(false);
+    }
+    noCommentsFilter()
+   
+
+  }, [allPosts]);
+  
+  
+
+  useEffect(() => {
+    noCommentsFilter()
+
+    // runs if theres a change in active
+
+  }, [active])
+  
 
   return (
     <>
@@ -126,22 +206,23 @@ export default function Home() {
         <link rel="icon" hrefnpm="/favicon.ico" />
       </Head>
       <main>
-        {showSkeleton ? (
+        {Loading ? (
           <Loader />
         ) : (
           <VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
-            <HStack m={5} spacing={10}></HStack>
-            
+            <HStack m={5} spacing={10}>
+              <Box onClick={()=>{setactive(!active)}}>
+                <FilterTag   alter={'with Comments'} title={"with Comments"} color={"red"} />
+              </Box>
+               
+            </HStack>
+
             <PostFeed posts={allPosts} />
 
-            {loading ? (
-              <Spinner />
-            ) : endReached ? (
+            {endReached ? (
               <Heading> no more posts</Heading>
             ) : (
-              <Button colorScheme={"blue"} onClick={getMore}>
-                more
-              </Button>
+              <Button onClick={getMore}>More</Button>
             )}
           </VStack>
         )}

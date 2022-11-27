@@ -123,6 +123,7 @@ const Comments = ({ canComment, takeId }) => {
       <HStack>
         {canComment && (
           <Button onClick={onOpen}>
+            <Text mr={2}>{postComments?.length?postComments.length:0}</Text>
             <ChatIcon
               onClick={() => {
                 getComments();

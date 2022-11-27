@@ -3,16 +3,10 @@ import React, { useEffect, useState } from "react";
 import { SmallAddIcon } from "@chakra-ui/icons";
 import { motion } from "framer-motion";
 
-const FilterTag = ({ color, title, CommentFilter }) => {
+const FilterTag = ({ color, title,alter }) => {
 
 
-  useEffect(() => {
-    
-  
-    CommentFilter(active)
-    
-  }, [active])
-  
+const [active, setactive] = useState(false)  
   return (
     <Tag
       layout
@@ -26,7 +20,7 @@ const FilterTag = ({ color, title, CommentFilter }) => {
       colorScheme={active ? color : "gray"}
     >
       <HStack>
-        <TagLabel>{active?title:'without comments'}</TagLabel>
+        <TagLabel>{active?title:alter}</TagLabel>
         {active && <TagCloseButton />}
         {!active && <SmallAddIcon />}
       </HStack>

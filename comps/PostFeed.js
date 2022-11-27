@@ -1,6 +1,5 @@
 import { Heading, HStack, Tag, TagCloseButton, TagLabel, VStack } from "@chakra-ui/react";
 import HotTakes from "../comps/HotTakes";
-import FilterTags from "./FilterTags";
 export default function PostFeed({ posts }) {
   
   return (

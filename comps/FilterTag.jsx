@@ -3,23 +3,27 @@ import React, { useEffect, useState } from "react";
 import { SmallAddIcon } from "@chakra-ui/icons";
 import { motion } from "framer-motion";
 
-const FilterTag = ({ color, title,alter }) => {
+const FilterTag = ({ color, title,alter,active,mutate }) => {
 
 
-const [active, setactive] = useState(false)  
+const variant={
+  initial:{y:-20,opacity:0 },
+  animate:{y:0,opacity:1},
+  exit:{y:20,opacity:0}
+
+}
+
   return (
     <Tag
       layout
       as={motion.span}
       cursor={"pointer"}
-      onClick={() => {
-        setactive(!active)
-      }}
+      onClick={()=>mutate()}
       size={["sm", "md", "lg"]}
       variant={"solid"}
       colorScheme={active ? color : "gray"}
     >
-      <HStack>
+      <HStack {...variant} as={motion.div}>
         <TagLabel>{active?title:alter}</TagLabel>
         {active && <TagCloseButton />}
         {!active && <SmallAddIcon />}

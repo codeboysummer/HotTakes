@@ -39,6 +39,9 @@ import Loader from "../comps/Loader";
 
 import { useRouter } from "next/router";
 import FilterTag from "../comps/FilterTag";
+import SearchBar from "../comps/SearchBar";
+import { motion } from "framer-motion";
+import useComponentVisible from "../lib/useComponentVisible";
 
 export default function Home() {
   const route = useRouter();
@@ -49,22 +52,27 @@ export default function Home() {
   const [Loading, setLoading] = useState(true);
   const [TotalLength, setTotalLength] = useState(0);
   const toast = useToast();
-  const [active, setactive] = useState(false)
+  const [orderFilter, setorderFilter] = useState(false)
 
-  // if (typeof window !== 'undefined') {
-  //     window.onscroll=function(){
-  //      if( window.innerHeight + window.scrollY >= document.body.offsetHeight){
-  //       console.log('bottom');
-  //       !endReached?getMore():''
-  //      }
+  const [active, setactive] = useState(false);
+  const [order, setorder] = useState("desc");
+  const [searchBarIsClicked, setsearchBarIsClicked] = useState(false);
 
-  //   }
-  // }
+  // if the oldest filter is active then asc else decending
+
+  if (typeof window !== "undefined") {
+    window.onscroll = function () {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        console.log("bottom");
+        !endReached ? getMore() : "";
+      }
+    };
+  }
 
   const getPosts = async () => {
     setendReached(false);
     const collectionRef = collection(db, "posts");
-    const q = query(collectionRef, orderBy("timestamp", "desc"), limit(4));
+    const q = query(collectionRef, orderBy("timestamp", order), limit(4));
     // get four of the first from the posts collection
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -116,7 +124,7 @@ export default function Home() {
       const collectionRef = collection(db, "posts");
       const q = query(
         collectionRef,
-        orderBy("timestamp", "desc"),
+        orderBy("timestamp", order),
         limit(4),
         startAfter(lastDoc)
       );
@@ -136,17 +144,18 @@ export default function Home() {
       console.log(error);
     }
   };
-  
-  const noCommentsFilter= ()=>{
 
-    if(active){
-    console.log('eh');
-      console.log(allPosts.filter((item)=>item.canComment));
-      return allPosts.filter((item)=>item.canComment)
-}
-else{
- return allPosts
-}
+  const noCommentsFilter = () => {
+    if (active) {
+      console.log("eh");
+      console.log(allPosts.filter((item) => item.canComment));
+      return allPosts.filter((item) => item.canComment);
+    } else {
+      return allPosts;
+    }
+  };
+  const handleComments=()=>{
+    setactive(!active)
   }
   useEffect(() => {
     if (!user) {
@@ -157,6 +166,10 @@ else{
 
     // rerun when user is present
   }, [user]);
+  const orderArray = () => {
+    setorder(order == "desc" ? "asc" : "desc",setorderFilter(true));
+    order=='desc'?setorderFilter(false):setorderFilter(true)
+  };
 
 
   useEffect(() => {
@@ -168,20 +181,25 @@ else{
       console.log(allPosts.length, "==", TotalLength);
       setendReached(false);
     }
-    noCommentsFilter()
-   
-
+    noCommentsFilter();
+    ascendingOder();
   }, [allPosts]);
-  
-  
 
   useEffect(() => {
-    noCommentsFilter()
+    getPosts();
+  }, [order]);
+
+  useEffect(() => {
+    noCommentsFilter();
 
     // runs if theres a change in active
+  }, [active]);
 
-  }, [active])
-  
+  function ascendingOder() {
+    if (false) {
+      console.log("reverse", allPosts.reverse());
+    }
+  }
 
   return (
     <>
@@ -194,20 +212,39 @@ else{
         {Loading ? (
           <Loader />
         ) : (
-          <VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
-            <HStack m={5} spacing={10}>
-              <Box onClick={()=>{setactive(!active)}}>
-                <FilterTag   alter={'with Comments'} title={"with Comments"} color={"red"} />
-              </Box>
-               
-            </HStack>
+          <VStack as={motion.div} layout mb={"5%"} mt={["15%", "10%", "7%"]}>
+            <SearchBar>
+              <HStack m={5} spacing={10}>
+              <HStack m={5} spacing={10}>
+                <FilterTag
+                mutate={handleComments}
+                  active={active}
+                  alter={"with Comments"}
+                  title={"with Comments"}
+                  color={"red"}
+                />
+
+
+                <Box>
+                  <FilterTag
+                  mutate={orderArray}
+                    active={orderFilter}
+                    alter={"newest"}
+                    title={"oldest"}
+                    color={"purple"}
+                  />
+                </Box>
+              </HStack>
+              </HStack>
+            </SearchBar>
 
             <PostFeed posts={noCommentsFilter()} />
 
             {endReached ? (
               <Heading> no more posts</Heading>
             ) : (
-              <Button onClick={getMore}>More</Button>
+              <></>
+              // <Button onClick={getMore}>More</Button>
             )}
           </VStack>
         )}

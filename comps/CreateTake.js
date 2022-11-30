@@ -119,6 +119,8 @@ return;
         canComment:switchValue,
         avatar: user.photoURL,
         username: username,
+        likes:0,
+        dislikes:0
       });
       settake({ description: "" });
       toast({title:"Post has been made 🚀", status:'success',

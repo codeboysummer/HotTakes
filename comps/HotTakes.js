@@ -65,6 +65,7 @@ import {
   deleteDoc,
   setDoc,
   updateDoc,
+  increment,
 } from "firebase/firestore";
 import {
   Menu,
@@ -87,6 +88,30 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   const [isEditable, setisEditable] = useState(false);
 
   const total = dislikeCount + likeCount;
+  const incrementVotes = async (operator) => {
+    const DocRef = doc(db, `posts/${takeId}`);
+
+    try {
+      await updateDoc(
+        DocRef,
+        operator ? { like: increment(1) } : { dislike: increment(1) }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const DecrementVotes = async (operator) => {
+    const DocRef = doc(db, `posts/${takeId}`);
+
+    try {
+      await updateDoc(
+        DocRef,
+        operator ? { like: increment(-1) } : { dislike: increment(-1) }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const UpVote = async () => {
     if (!user) {
@@ -197,39 +222,37 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getNumberOfDisLikes();
     getNumberOfLikes();
   }, []);
-  const isEditableVariant={
-    initial:{
-opacity:0,y:-20,scale:.7
+  const isEditableVariant = {
+    initial: {
+      opacity: 0,
+      y: -20,
+      scale: 0.7,
     },
-    animate:{
-      opacity:1,y:0,scale:1
-
+    animate: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
     },
-    transition:{
-ease:'easeOut'
+    transition: {
+      ease: "easeOut",
     },
-
-    
-  }
+  };
 
   return (
     <>
       <>
         <VStack>
-          <HotTakeLayout likeCount={likeCount} total={total} dislikeCount={dislikeCount} >
-            <VStack
-            as={motion.div}
-        
-              p={1}
-              w={"100%"}
-              
-              layout
-        
-            >
+          <HotTakeLayout
+            likeCount={likeCount}
+            total={total}
+            dislikeCount={dislikeCount}
+          >
+            <VStack as={motion.div} p={1} w={"100%"} layout>
               {postUsername == ourUsername ? (
                 <>
                   <MenuBtn
@@ -250,79 +273,87 @@ ease:'easeOut'
               )}
               <Flex
                 // w={[300, 350, 400, 500, 700]}
-                w={['90vw',400, 500, 700]}
-                height={'100%'}
+                w={["90vw", 400, 500, 700]}
+                height={"100%"}
                 justifyContent={"space-around"}
                 alignItems={"center"}
                 // h={"fit-content"}
               >
-                {<VStack  >
-                  <Text
-
-                  as={motion.p}
-                  whileTap={{ scale: 1.4,y:-20 }}
-                    cursor={"pointer"}
-                    onClick={UpVote}
-                    fontSize={["2.4rem", "3rem"]}
-                  >
-                    👍
-                  </Text>
-                  <Stat >
-                    <StatNumber textAlign={'center'}>{likeCount}</StatNumber>
-                    <StatHelpText>
-                      <StatArrow type="increase" />
-                      {likeCount ? ((likeCount / total) * 100).toFixed(1) : "0"}%
-                    </StatHelpText>
-                  </Stat>
-                </VStack>}
+                {
+                  <VStack>
+                    <Text
+                      as={motion.p}
+                      whileTap={{ scale: 1.4, y: -20 }}
+                      cursor={"pointer"}
+                      onClick={UpVote}
+                      fontSize={["2.4rem", "3rem"]}
+                    >
+                      👍
+                    </Text>
+                    <Stat>
+                      <StatNumber textAlign={"center"}>{likeCount}</StatNumber>
+                      <StatHelpText>
+                        <StatArrow type="increase" />
+                        {likeCount
+                          ? ((likeCount / total) * 100).toFixed(1)
+                          : "0"}
+                        %
+                      </StatHelpText>
+                    </Stat>
+                  </VStack>
+                }
                 {isEditable ? (
                   <AnimatePresence>
                     <Input
-                    key={takeId}
-                    as={motion.input}{... isEditableVariant}
+                      key={takeId}
+                      as={motion.input}
+                      {...isEditableVariant}
                       onChange={(e) => setformValue(e.target.value)}
                       isInvalid={formValue.length == 0}
                       value={formValue}
                       type={"text"}
                     />
-        
                   </AnimatePresence>
                 ) : (
                   <Heading
-                    size={['sm',"md", "lg"]}
-                    w={["100%",'80%','70%']}
+                    size={["sm", "md", "lg"]}
+                    w={["100%", "80%", "70%"]}
                     flexWrap={"wrap"}
                     textAlign={"center"}
                   >
                     {take}
                   </Heading>
                 )}
-               { <VStack>
-                  <Text
-                  as={motion.p}
-                  whileTap={{ scale: 1.4,y:10 }}
-                  transition={{duration:2}}
-                    cursor={"pointer"}
-                    onClick={DownVote}
-                    fontSize={["2.5rem", "3rem"]}
-                  >
-                    👎
-                  </Text>{" "}
-                  <Stat>
-                    <StatNumber  textAlign={'center'}>{dislikeCount}</StatNumber>
-                    <StatHelpText>
-                      <StatArrow type="decrease" />
-                      {dislikeCount
-                        ? ((dislikeCount / total) * 100).toFixed(1)
-                        : "0"}
-                      %
-                    </StatHelpText>
-                  </Stat>
-                </VStack>}
+                {
+                  <VStack>
+                    <Text
+                      as={motion.p}
+                      whileTap={{ scale: 1.4, y: 10 }}
+                      transition={{ duration: 2 }}
+                      cursor={"pointer"}
+                      onClick={DownVote}
+                      fontSize={["2.5rem", "3rem"]}
+                    >
+                      👎
+                    </Text>{" "}
+                    <Stat>
+                      <StatNumber textAlign={"center"}>
+                        {dislikeCount}
+                      </StatNumber>
+                      <StatHelpText>
+                        <StatArrow type="decrease" />
+                        {dislikeCount
+                          ? ((dislikeCount / total) * 100).toFixed(1)
+                          : "0"}
+                        %
+                      </StatHelpText>
+                    </Stat>
+                  </VStack>
+                }
               </Flex>
               {isEditable ? (
                 <AnimatePresence>
-                  <HStack key={takeId} as={motion.div}{... isEditableVariant}>
+                  <HStack key={takeId} as={motion.div} {...isEditableVariant}>
                     <IconButton
                       onClick={editTake}
                       colorScheme={"green"}

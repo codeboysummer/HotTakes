@@ -86,32 +86,10 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   const [likeCount, setlikeCount] = useState(0);
   const [dislikeCount, setdislikeCount] = useState(0);
   const [isEditable, setisEditable] = useState(false);
+  const [isliked, setisliked] = useState(false);
+  const [isDisliked, setisDisliked] = useState(false);
 
   const total = dislikeCount + likeCount;
-  const incrementVotes = async (operator) => {
-    const DocRef = doc(db, `posts/${takeId}`);
-
-    try {
-      await updateDoc(
-        DocRef,
-        operator ? { like: increment(1) } : { dislike: increment(1) }
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const DecrementVotes = async (operator) => {
-    const DocRef = doc(db, `posts/${takeId}`);
-
-    try {
-      await updateDoc(
-        DocRef,
-        operator ? { like: increment(-1) } : { dislike: increment(-1) }
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const UpVote = async () => {
     if (!user) {
@@ -146,7 +124,9 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
       }
 
       await setDoc(upVoteDocRef, { exists: true });
+
       getNumberOfLikes();
+
       toast({ title: "liked", status: "success", duration: 1000 });
     } catch (error) {
       console.log(error);
@@ -156,7 +136,25 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     const collectionRef = collection(db, `posts/${takeId}/upvote/`);
     const q = query(collectionRef);
     const collectionDoc = await getDocs(q);
+    const DocRef = doc(db, `posts/${takeId}`);
+    await updateDoc(DocRef, { like: collectionDoc.size });
     return setlikeCount(collectionDoc.size);
+  };
+  const alreadyVotedCheck = async () => {
+    const upVoteDocRef = doc(
+      db,
+      `posts/${takeId}/upvote/${user.uid.toString()}`
+    );
+    const downVoteDocRef = doc(
+      db,
+      `posts/${takeId}/downvote/${user.uid.toString()}`
+    );
+
+    const downVoteDoc = await getDoc(downVoteDocRef);
+    const upVoteDoc = await getDoc(upVoteDocRef);
+
+    upVoteDoc.exists() ? setisliked(true) : setisliked(false);
+    downVoteDoc.exists() ? setisDisliked(true) : setisDisliked(false);
   };
   const DownVote = async () => {
     if (!user) {
@@ -191,6 +189,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
       }
 
       await setDoc(downVoteDocRef, { exists: true });
+
       getNumberOfDisLikes();
 
       toast({ title: "disliked", status: "success", duration: 1000 });
@@ -202,7 +201,9 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     const collectionRef = collection(db, `posts/${takeId}/downvote/`);
     const q = query(collectionRef);
     const collectionDoc = await getDocs(q);
+    const DocRef = doc(db, `posts/${takeId}`);
 
+    await updateDoc(DocRef, { dislike: collectionDoc.size });
     return setdislikeCount(collectionDoc.size);
   };
   const editTake = async () => {
@@ -227,6 +228,14 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     getNumberOfDisLikes();
     getNumberOfLikes();
   }, []);
+
+  useEffect(() => {
+    alreadyVotedCheck()
+  }, [])
+  useEffect(() => {
+    alreadyVotedCheck()
+  }, [UpVote,DownVote])
+  
   const isEditableVariant = {
     initial: {
       opacity: 0,
@@ -287,6 +296,10 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                       cursor={"pointer"}
                       onClick={UpVote}
                       fontSize={["2.4rem", "3rem"]}
+                      bg={isliked?'green.200':'none'}
+                      
+                      borderRadius={'1rem'}
+                      
                     >
                       👍
                     </Text>
@@ -333,6 +346,9 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                       cursor={"pointer"}
                       onClick={DownVote}
                       fontSize={["2.5rem", "3rem"]}
+                      bg={isDisliked?'red.200':'none'}
+                      
+                      borderRadius={'1rem'}
                     >
                       👎
                     </Text>{" "}

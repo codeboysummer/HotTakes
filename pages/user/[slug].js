@@ -31,6 +31,7 @@ import {
 
 import { UserContext } from "../../lib/context";
 import Loader from "../../comps/Loader";
+import PostsUserLiked from "../../comps/PostsUserLiked";
 
 export default function Welcomeuser() {
   const navigate = useRouter();
@@ -97,6 +98,7 @@ setshowLoader(true)
                   takeId={doc.id}
                 />
               ))}
+              <PostsUserLiked/>
         </VStack>}
       </>
     </>

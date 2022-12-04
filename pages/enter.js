@@ -142,7 +142,7 @@ function UsernameForm() {
   return (
     !username && (
       <Box>
-        <h3>Choose Username</h3>
+        <Heading>Choose Username</Heading>
         <form onSubmit={onSubmit}>
           <Input
             name="username"
@@ -160,10 +160,10 @@ function UsernameForm() {
           </Button>
 
          
-          <div>
+          <Box>
             Username: {formValue}
             Username Valid: {isValid.toString()?'this username is ready to take':'this username is taken'}
-          </div>
+          </Box>
         </form>
       </Box>
     )

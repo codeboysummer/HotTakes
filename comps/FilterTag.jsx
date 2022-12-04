@@ -14,7 +14,8 @@ const variant={
 }
 
   return (
-    <Tag
+    <Tag 
+    flexShrink={0}
       layout
       as={motion.span}
       cursor={"pointer"}

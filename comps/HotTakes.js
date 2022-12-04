@@ -66,6 +66,7 @@ import {
   setDoc,
   updateDoc,
   increment,
+  arrayUnion,
 } from "firebase/firestore";
 import {
   Menu,
@@ -77,8 +78,10 @@ import {
 import MenuBtn from "./MenuBtn";
 import HotTakeLayout from "./HotTakeLayout";
 import { animate, motion } from "framer-motion";
+import { update } from "lodash";
 
-const HotTakes = ({ take, canComment, takeId, postUsername }) => {
+
+const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked }) => {
   const toast = useToast();
   const [user] = useAuthState(auth);
   const [formValue, setformValue] = useState(take);
@@ -97,6 +100,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
       return;
     }
     try {
+      const postDocument = doc(db, `posts/${takeId}`);
       const upVoteDocRef = doc(
         db,
         `posts/${takeId}/upvote/${user.uid.toString()}`
@@ -111,6 +115,9 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
 
       if (downVoteDoc.exists()) {
         await deleteDoc(downVoteDocRef);
+        await updateDoc(postDocument,{
+          whoDisliked:whoDisliked.filter((item)=>item.userid!=user.uid)
+        })
         getNumberOfDisLikes();
       }
 
@@ -120,11 +127,17 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
           title: "you already liked this",
           duration: 1000,
         });
+
         return;
       }
 
       await setDoc(upVoteDocRef, { exists: true });
 
+      await updateDoc(postDocument, {
+        whoLiked: arrayUnion({
+          userid: user?.uid,
+        }),
+      });
       getNumberOfLikes();
 
       toast({ title: "liked", status: "success", duration: 1000 });
@@ -157,6 +170,8 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
     downVoteDoc.exists() ? setisDisliked(true) : setisDisliked(false);
   };
   const DownVote = async () => {
+    const postDocument = doc(db, `posts/${takeId}`);
+
     if (!user) {
       toast({ title: "please create an account to comment " });
       return;
@@ -176,6 +191,9 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
 
       if (upVoteDoc.exists()) {
         await deleteDoc(upVoteDocRef);
+        await updateDoc(postDocument,{
+          whoLiked:whoLiked.filter((item)=>item.userid!=user.uid)
+        })
         getNumberOfLikes();
       }
 
@@ -189,6 +207,11 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
       }
 
       await setDoc(downVoteDocRef, { exists: true });
+      await updateDoc(postDocument, {
+        whoDisliked: arrayUnion({
+          userid: user?.uid,
+        }),
+      });
 
       getNumberOfDisLikes();
 
@@ -230,12 +253,12 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   }, []);
 
   useEffect(() => {
-    alreadyVotedCheck()
-  }, [])
+    alreadyVotedCheck();
+  }, []);
   useEffect(() => {
-    alreadyVotedCheck()
-  }, [UpVote,DownVote])
-  
+    alreadyVotedCheck();
+  }, [UpVote, DownVote]);
+
   const isEditableVariant = {
     initial: {
       opacity: 0,
@@ -296,10 +319,8 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                       cursor={"pointer"}
                       onClick={UpVote}
                       fontSize={["2.4rem", "3rem"]}
-                      bg={isliked?'green.200':'none'}
-                      
-                      borderRadius={'1rem'}
-                      
+                      bg={isliked ? "green.200" : "none"}
+                      borderRadius={"1rem"}
                     >
                       👍
                     </Text>
@@ -337,6 +358,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                     {take}
                   </Heading>
                 )}
+
                 {
                   <VStack>
                     <Text
@@ -346,9 +368,8 @@ const HotTakes = ({ take, canComment, takeId, postUsername }) => {
                       cursor={"pointer"}
                       onClick={DownVote}
                       fontSize={["2.5rem", "3rem"]}
-                      bg={isDisliked?'red.200':'none'}
-                      
-                      borderRadius={'1rem'}
+                      bg={isDisliked ? "red.200" : "none"}
+                      borderRadius={"1rem"}
                     >
                       👎
                     </Text>{" "}

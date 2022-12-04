@@ -44,7 +44,6 @@ const CreateTake = () => {
   const [switchValue, setswitchValue] = useState(false);
   const [user] = useAuthState(auth);
   const query = collection(db, `users`);
-  const [docs, loading, error] = useCollectionData(query);
 
   const toggleSwitch = () => {
     if (switchValue == true) {

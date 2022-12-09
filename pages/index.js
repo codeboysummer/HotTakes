@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import PostFeed from "../comps/PostFeed";
 import { auth, db } from "../lib/firebase";
+
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
 import {
@@ -60,7 +61,6 @@ export default function Home() {
   const [active, setactive] = useState(false);
   const [order, setorder] = useState("desc");
   const [postlimit, setpostlimit] = useState(4);
-  const [test, settest] = useState([]);
 
   // if the oldest filter is active then asc else decending
   
@@ -176,6 +176,8 @@ export default function Home() {
     }
 
     getPosts();
+    getMore()
+    console.log(allPosts);
 
     // rerun when user is present
   }, [user]);
@@ -248,9 +250,8 @@ export default function Home() {
             {endReached ? (
               <Heading> no more posts</Heading>
             ) : (
-              <Button colorScheme={"blue"} onClick={getMore}>
-                More
-              </Button>
+              <>
+              </>
             )}
           </VStack>
         )}

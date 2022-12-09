@@ -14,9 +14,11 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import HotTakes from "../../comps/HotTakes";
 import { DragHandleIcon } from "@chakra-ui/icons";
+import { orderBy } from "firebase/firestore";
 
 import {
   Box,
+  Button,
   Heading,
   HStack,
   IconButton,
@@ -35,14 +37,16 @@ import PostsUserLiked from "../../comps/PostsUserLiked";
 
 export default function Welcomeuser() {
   const navigate = useRouter();
+  const [AllPosts, setAllPosts] = useState([]);
 
-  const { username } = useContext(UserContext);
   const [user, loading] = useAuthState(auth);
   const [takes, settakes] = useState([]);
-const [showLoader, setshowLoader] = useState(false)
+  const [showLoader, setshowLoader] = useState(false);
+  
+       
   const getData = async () => {
-setshowLoader(true)
-    if (loading) return ;
+    setshowLoader(true);
+    if (loading) return;
     if (!user) return navigate.push("/enter");
 
     const collectionRef = collection(db, "posts");
@@ -51,13 +55,10 @@ setshowLoader(true)
       settakes(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     });
     setTimeout(() => {
-      setshowLoader(false)
+      setshowLoader(false);
     }, 1000);
     return unsubscribe;
   };
-
-  // use effect is because on initial page load the user may not have been loaded yet so when it changes the useeffect will re-run
-  // giving fresh data
 
   useEffect(() => {
     if (!user) {
@@ -66,40 +67,27 @@ setshowLoader(true)
     getData();
   }, [user]);
 
-  // useEffect(() => {
-  //   console.log('didnt run');
-  //   takes?.forEach((doc)=>{
-  //     console.log(doc.id,'===>',doc.data());
-  //   });
-  //   console.log('run');
-  // }, []);
-
-  // const takesDoc=doc(db,`users/${navigate.query.slug}/takes`)
-  // const [docs,loading,error]=useCollectionDataOnce(takesDoc)
-
-  // we need username and pic and takes and maybe email
-
-  //   querySnapshot.forEach((doc) => {
-  //   // doc.data() is never undefined for query doc snapshots
-  //   console.log(doc.id, " => ", doc.data());
-
   return (
     <>
       <>
-        { showLoader?<Loader/>:<VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
-          {takes?.length == 0
-            ? "you dont have any takes"
-            : takes?.map((doc) => (
-                <HotTakes
-                  key={doc.id}
-                  postUsername={doc.username}
-                  canComment={doc.canComment}
-                  take={doc.take}
-                  takeId={doc.id}
-                />
-              ))}
-              <PostsUserLiked/>
-        </VStack>}
+        {showLoader ? (
+          <Loader />
+        ) : (
+          <VStack mb={"5%"} mt={["15%", "10%", "7%"]}>
+            {takes?.length == 0
+              ? "you dont have any takes"
+              : takes?.map((doc) => (
+                  <HotTakes
+                    key={doc.id}
+                    postUsername={doc.username}
+                    canComment={doc.canComment}
+                    take={doc.take}
+                    takeId={doc.id}
+                  />
+                ))}
+            <PostsUserLiked />
+          </VStack>
+        )}
       </>
     </>
   );

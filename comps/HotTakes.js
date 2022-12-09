@@ -81,7 +81,7 @@ import { animate, motion } from "framer-motion";
 import { update } from "lodash";
 
 
-const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked }) => {
+const HotTakes = ({ take, canComment, takeId, postUsername }) => {
   const toast = useToast();
   const [user] = useAuthState(auth);
   const [formValue, setformValue] = useState(take);
@@ -103,22 +103,25 @@ const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked 
       const postDocument = doc(db, `posts/${takeId}`);
       const upVoteDocRef = doc(
         db,
-        `posts/${takeId}/upvote/${user.uid.toString()}`
+        `posts/${takeId}/upvote/${user?.uid.toString()}`
       );
       const downVoteDocRef = doc(
         db,
-        `posts/${takeId}/downvote/${user.uid.toString()}`
+        `posts/${takeId}/downvote/${user?.uid.toString()}`
       );
 
       const downVoteDoc = await getDoc(downVoteDocRef);
       const upVoteDoc = await getDoc(upVoteDocRef);
 
       if (downVoteDoc.exists()) {
+
         await deleteDoc(downVoteDocRef);
-        await updateDoc(postDocument,{
-          whoDisliked:whoDisliked.filter((item)=>item.userid!=user.uid)
-        })
+
+        // await updateDoc(postDocument,{
+        //   whoDisliked:whoDisliked.filter((item)=>item.userid!=user?.uid)
+        // })
         getNumberOfDisLikes();
+
       }
 
       if (upVoteDoc.exists()) {
@@ -126,6 +129,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked 
           status: "error",
           title: "you already liked this",
           duration: 1000,
+          
         });
 
         return;
@@ -133,11 +137,11 @@ const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked 
 
       await setDoc(upVoteDocRef, { exists: true });
 
-      await updateDoc(postDocument, {
-        whoLiked: arrayUnion({
-          userid: user?.uid,
-        }),
-      });
+      // await updateDoc(postDocument, {
+      //   whoLiked: arrayUnion({
+      //     userid: user?.uid,
+      //   }),
+      // });
       getNumberOfLikes();
 
       toast({ title: "liked", status: "success", duration: 1000 });
@@ -191,9 +195,9 @@ const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked 
 
       if (upVoteDoc.exists()) {
         await deleteDoc(upVoteDocRef);
-        await updateDoc(postDocument,{
-          whoLiked:whoLiked.filter((item)=>item.userid!=user.uid)
-        })
+        // await updateDoc(postDocument,{
+        //   whoLiked:whoLiked.filter((item)=>item.userid!=user.uid)
+        // })
         getNumberOfLikes();
       }
 
@@ -207,11 +211,11 @@ const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked 
       }
 
       await setDoc(downVoteDocRef, { exists: true });
-      await updateDoc(postDocument, {
-        whoDisliked: arrayUnion({
-          userid: user?.uid,
-        }),
-      });
+      // await updateDoc(postDocument, {
+      //   whoDisliked: arrayUnion({
+      //     userid: user?.uid,
+      //   }),
+      // });
 
       getNumberOfDisLikes();
 
@@ -303,6 +307,7 @@ const HotTakes = ({ take, canComment, takeId, postUsername,whoLiked,whoDisliked 
                   </Text>
                 </>
               )}
+
               <Flex
                 // w={[300, 350, 400, 500, 700]}
                 w={["90vw", 400, 500, 700]}
